@@ -1,2 +1,2 @@
 # WebLib
-WebLibrary - A  web-based library system
+A  web-based library system, written in Python
