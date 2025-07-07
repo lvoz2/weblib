@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div id="navbar">
+    <div class="nav list">
+        <div class="nav item logo">
+            <p>insert logo</p>
+        </div>
+        <div class="nav item">
+            <a href="/">HOME</a>
+        </div>
+        <div class="nav item">
+            <a href="/browse">BROWSE</a>
+        </div>
+        <div class="nav item">
+            <a href="/saved">SAVED</a>
+        </div>
+        <div class="nav item stretch">
+            <div id="search_container">
+                <input type="text" id="search_box" class="stretch" placeholder="Search..."></input>
+                <button id="search_btn">Go</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
