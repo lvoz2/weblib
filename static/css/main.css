@@ -7,23 +7,30 @@
     --colour-5: light-dark(#ADD7F6, #0E5181);
 }
 
-body {
-    margin: 0;
+html {
+    height: 100%;
 }
 
-#navbar {
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
+body {
+    margin: 0;
+    background-color: lightgrey;
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+}
+
+main {
+    margin: 0 auto;
+    max-width: 800px;
+    background-color: white;
+    height: 100%;
 }
 
 .nav.list {
     display: flex;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.nav.list:first-child {
-    border-left: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
 .nav.item {
@@ -65,4 +72,106 @@ body {
     border: none;
     background-color: var(--colour-2);
     color: var(--text-colour);
+}
+
+#content {
+    padding: 20px;
+}
+
+.link {
+    text-decoration: none;
+    color: black;
+    transition: padding-right 0.1s ease;
+    font-size: x-large;
+    font-weight: bold;
+}
+
+.link-container {
+    position: relative;
+    text-decoration: none;
+    font-size: large;
+}
+
+.link-container::before {
+    content: "";
+    width: 100%;
+    height: 1px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+}
+
+.arrow {
+    transition: 0.1s ease;
+    display: inline-block;
+}
+
+.link:hover {
+    padding-right: 10px;
+}
+
+.link:hover .arrow {
+    transform: translateX(10px);
+}
+
+.card {
+    margin-top: 10px;
+    border-radius: 5px 5px 5px 5px;
+    border: solid 1px black;
+    width: 200px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.card h3 {
+    margin: 0;
+}
+
+.card p {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-clamp: 6;
+    -webkit-line-clamp: 6;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+.card-inner-box {
+    padding: 10px;
+}
+
+.card-inner-top {
+    font-size: large;
+    height: 1.625rem
+}
+
+.card-inner-top h3 {
+    display: inline-block;
+}
+
+.save-icons {
+    color: black;
+    transition: color 0.3s;
+    float: right;
+    line-height: 1;
+    position: relative;
+    top: 50%;
+    transform: translate(0,-50%);
+}
+
+.save-icons:hover, .save-icon.fa-solid.fa-bookmark {
+    color: red;
+}
+
+#recent {
+    margin-top: 20px;
 }

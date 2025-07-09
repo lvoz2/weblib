@@ -1,25 +1,62 @@
 {% extends 'layout.html' %}
+{% block head %}
+{% for item in saved_items %}
+<link rel="preload" href="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" as="image" type="{{item.thumb_mime}}">
+{% endfor %}
+{% endblock %}
 {% block content %}
-<div id="navbar">
-    <div class="nav list">
-        <div class="nav item logo">
-            <p>insert logo</p>
-        </div>
-        <div class="nav item">
-            <a href="/">HOME</a>
-        </div>
-        <div class="nav item">
-            <a href="/browse">BROWSE</a>
-        </div>
-        <div class="nav item">
-            <a href="/saved">SAVED</a>
-        </div>
-        <div class="nav item stretch">
-            <div id="search_container">
-                <input type="text" id="search_box" class="stretch" placeholder="Search..."></input>
-                <button id="search_btn">Go</button>
+<div id="content">
+    <div id="saved">
+        <a class="link-container" href="/saved">
+            <span class="link">Saved <span class="arrow">&#8594</span></span>
+        </a>
+        {% if saved_items %}
+        <div class="item_list">
+        {% for item in saved_items %}
+        <div class="card">
+            <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+            <div class="card-inner-box">
+                <div class="card-inner-top">
+                    <h3>{{ item.title }}</h3>
+                    <div class="save-icons">
+                        <i class="save-icon fa-solid fa-bookmark"></i>
+                        <i class="save-icon fa-regular fa-bookmark"></i>
+                    </div>
+                </div>
+                <p>{{ item.description }}</p>
             </div>
         </div>
+        {% endfor %}
+        </div>
+        {% else %}
+        <div class="help"></div>
+        {% endif %}
+    </div>
+    <div id="recent">
+        <a class="link-container" href="/recent">
+            <span class="link">Recently Viewed <span class="arrow">&#8594</span></span>
+        </a>
+        {% if recent_items %}
+        <div class="item_list">
+        {% for item in recent_items %}
+        <div class="card">
+            <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+            <div class="card-inner-box">
+                <div class="card-inner-top">
+                    <h3>{{ item.title }}</h3>
+                    <div class="save-icons">
+                        <i class="save-icon fa-solid fa-bookmark"></i>
+                        <i class="save-icon fa-regular fa-bookmark"></i>
+                    </div>
+                </div>
+                <p>{{ item.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        {% else %}
+        <div class="help"></div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
