@@ -73,6 +73,8 @@
 .card-inner-box {
     padding: 10px;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-inner-top {
@@ -87,7 +89,6 @@
 /* Fade transition from https://codepen.io/toaster99/pen/BpgzQR?editors=1100 */
 .save-icons {
     color: var(--text-colour);
-    transition: color 0.3s;
     float: right;
     line-height: 1;
     position: relative;
@@ -96,7 +97,7 @@
 }
 
 .save-icon {
-    transition: opacity 0.25s;
+    transition: color 0.3s, opacity 0.25s;
 }
 
 .save-icon:not(.hidden) {
@@ -125,4 +126,8 @@
     background-color: var(--colour-4);
     border-radius: 0px 0px 4px 4px;
     font-size: small;
+}
+
+.card-description {
+    flex-grow: 1;
 }

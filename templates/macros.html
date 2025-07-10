@@ -1,0 +1,20 @@
+{% macro card(item) %}
+<div class="card">
+    <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+    <div class="card-inner-box">
+        <div class="card-inner-top">
+            <h3>{{ item.title }}</h3>
+            <div class="save-icons">
+                <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark parent-styled"></i>
+                <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark parent-styled"></i>
+            </div>
+        </div>
+        <div class="card-description">
+            <p>{{ item.description }}</p>
+        </div>
+    </div>
+    <div class="card-source">
+        <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
+    </div>
+</div>
+{% endmacro %}
