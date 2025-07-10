@@ -1,0 +1,90 @@
+.card {
+    border-radius: 5px 5px 5px 5px;
+    border: solid 1px var(--text-colour);
+    width: 200px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* MDN ref: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
+.card img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px 4px 0px 0px;
+}
+
+.card h3 {
+    margin: 0;
+}
+
+/* Clamping taken from https://css-tricks.com/almanac/properties/l/line-clamp/ */
+/* and https://stackoverflow.com/questions/33058004/applying-an-ellipsis-to-multiline-text */
+.card p {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-clamp: 6;
+    -webkit-line-clamp: 6;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+.card-inner-box {
+    padding: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-inner-top {
+    font-size: large;
+    height: 1.625rem
+}
+
+.card-inner-top h3 {
+    display: inline-block;
+}
+
+/* Fade transition from https://codepen.io/toaster99/pen/BpgzQR?editors=1100 */
+.save-icons {
+    color: var(--text-colour);
+    float: right;
+    line-height: 1;
+    position: relative;
+    top: 50%;
+    transform: translate(0,-50%);
+}
+
+.save-icon {
+    transition: color 0.3s, opacity 0.25s;
+}
+
+.save-icon:not(.hidden) {
+    opacity: 1;
+}
+
+.save-icon-first {
+    position: absolute;
+}
+
+.save-icon.hidden {
+    opacity: 0;
+}
+
+.save-icons:hover, .save-icon.fa-solid.fa-bookmark {
+    color: red;
+}
+
+.card-source {
+    padding: 10px;
+    border-top: 1px solid var(--colour-6);
+    background-color: var(--colour-4);
+    border-radius: 0px 0px 4px 4px;
+    font-size: small;
+}
+
+.card-description {
+    flex-grow: 1;
+}

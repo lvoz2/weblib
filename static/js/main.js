@@ -3,7 +3,11 @@
  * https://youmightnotneedjquery.com/
  */
 
-function toggleSave(e) {
+if (!window.app) {
+    window.app = {};
+}
+
+window.app.toggleSave = function(e) {
     let target = e.target;
     if (target.innerHTML.length === 0) {
         target = target.parentElement;
@@ -13,14 +17,14 @@ function toggleSave(e) {
     }
 }
 
-function init() {
+window.app.init = function() {
     document.querySelectorAll(".save-icons").forEach((e) => {
-        e.addEventListener("click", toggleSave);
+        e.addEventListener("click", window.app.toggleSave);
     });
 }
 
 if (document.readyState !== "loading") {
-    init()
+    window.app.init()
 } else {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", window.app.init);
 }

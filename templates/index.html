@@ -2,6 +2,7 @@
 {% extends 'layout.html' %}
 {% block critical_files_preload %}
 <link rel="preload" href="{{ url_for('static', filename='css/index.css') }}" crossorigin="anonymous" as="style">
+<link rel="preload" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" as="style">
 {% endblock %}
 {% block preload_head %}
 {% if saved_items %}
@@ -17,6 +18,7 @@
 {% endblock %}
 {% block critical_files %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
 {% endblock %}
 {% block selected_home %} selected{% endblock %}
 {% block content %}
@@ -25,7 +27,7 @@
         <span class="link">Saved <span class="arrow">&#8594</span></span>
     </a>
     {% if saved_items %}
-    <div class="item_list">
+    <div class="item-list">
     {% for item in saved_items %}
     {{ macros.card(item) }}
     {% endfor %}
@@ -39,7 +41,7 @@
         <span class="link">Recently Viewed <span class="arrow">&#8594</span></span>
     </a>
     {% if recent_items %}
-    <div class="item_list">
+    <div class="item-list">
     {% for item in recent_items %}
     {{ macros.card(item) }}
     {% endfor %}

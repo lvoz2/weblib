@@ -11,13 +11,25 @@
 {% endblock %}
 {% block critical_files %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}">
+<script src="{{ url_for('static', filename='js/browse.js') }}" async defer></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low">
 {% endblock %}
 {% block selected_browse %} selected{% endblock %}
 {% block content %}
-<div class="nav item stretch">
-    <div id="search_container">
-        <input type="text" id="search_box" class="stretch" placeholder="Search..."></input>
-        <button id="search_btn">Go</button>
+<div id="outerSearchBox">
+    <div id="searchContainer">
+        <input type="text" id="searchBox" class="stretch" placeholder="Search..."></input>
+        <button id="searchBtn">Go</button>
+    </div>
+</div>
+<div id="lowerBox">
+    <div id="filterPane">
+
+    </div>
+    <div id="resultsPane">
+        <div id="resultsInner">
+            
+        </div>
     </div>
 </div>
 {% endblock %}

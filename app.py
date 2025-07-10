@@ -81,5 +81,35 @@ def saved() -> str:
     return flask.render_template("saved.html")
 
 
+@app.post("/api/browse/search")
+def search() -> dict[str, list[dict[str, str | bool | dict[str, str]]]]:
+    json = flask.request.json
+    print(json)
+    return {
+        "result": [
+            {
+                "id": "717de6c1-32da-4001-b9a3-6378f4a38c64",
+                "title": "Australia",
+                "description": "Australia, officially the Commonwealth of Australia, "
+                + "is a country comprising the mainland of the Australian continent, "
+                + "the island of Tasmania and numerous smaller islands. It has a "
+                + "total area of 7,688,287 km2 (2,968,464 sq mi), making it the "
+                + "sixth-largest country in the world and the largest in Oceania. "
+                + "Australia is the world's flattest and driest inhabited continent. "
+                + "It is a megadiverse country, and its size gives it a wide variety "
+                + "of landscapes and climates including deserts in the interior and "
+                + "tropical rainforests along the coast. ",
+                "thumb_ext": "svg",
+                "thumb_mime": "image/svg+xml",
+                "saved": True,
+                "source": {
+                    "url": "https://en.wikipedia.org/wiki/Australia",
+                    "name": "Wikipedia",
+                },
+            }
+        ]
+    }
+
+
 if __name__ == "__main__":
     app.run(debug=True)
