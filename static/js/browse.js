@@ -24,7 +24,7 @@ window.app.search = async function(e) {
     for (item of json) {
         console.log(item);
         const cardHTML = `<div class="card">
-            <img src="/static/cache/` + item.id + "/thumb." + item.thumb_ext + `">
+            <img src="/static/cache/` + item.id + "/thumb." + item.thumb_ext + `" width="200px" height="` + item.thumb_height +`px">
             <div class="card-inner-box">
                 <div class="card-inner-top">
                     <h3>` + item.title + `</h3>

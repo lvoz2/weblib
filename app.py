@@ -31,6 +31,7 @@ def index() -> str:
                 + "tropical rainforests along the coast. ",
                 "thumb_ext": "svg",
                 "thumb_mime": "image/svg+xml",
+                "thumb_height": 100,
                 "saved": True,
                 "source": {
                     "url": "https://en.wikipedia.org/wiki/Australia",
@@ -53,6 +54,7 @@ def index() -> str:
                 + "tropical rainforests along the coast. ",
                 "thumb_ext": "svg",
                 "thumb_mime": "image/svg+xml",
+                "thumb_height": 100,
                 "saved": True,
                 "source": {
                     "url": "https://en.wikipedia.org/wiki/Australia",
@@ -101,6 +103,7 @@ def search() -> dict[str, list[dict[str, str | bool | dict[str, str]]]]:
                 + "tropical rainforests along the coast. ",
                 "thumb_ext": "svg",
                 "thumb_mime": "image/svg+xml",
+                "thumb_height": 100,
                 "saved": True,
                 "source": {
                     "url": "https://en.wikipedia.org/wiki/Australia",
