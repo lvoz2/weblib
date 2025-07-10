@@ -19,11 +19,14 @@
                 <div class="card-inner-top">
                     <h3>{{ item.title }}</h3>
                     <div class="save-icons">
-                        <i class="save-icon fa-solid fa-bookmark"></i>
-                        <i class="save-icon fa-regular fa-bookmark"></i>
+                        <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
+                        <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
                     </div>
                 </div>
                 <p>{{ item.description }}</p>
+            </div>
+            <div class="card-source">
+                <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
             </div>
         </div>
         {% endfor %}
@@ -45,11 +48,14 @@
                 <div class="card-inner-top">
                     <h3>{{ item.title }}</h3>
                     <div class="save-icons">
-                        <i class="save-icon fa-solid fa-bookmark"></i>
-                        <i class="save-icon fa-regular fa-bookmark"></i>
+                        <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
+                        <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
                     </div>
                 </div>
                 <p>{{ item.description }}</p>
+            </div>
+            <div class="card-source">
+                <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
             </div>
         </div>
         {% endfor %}

@@ -147,6 +147,7 @@ main {
 
 .card-inner-box {
     padding: 10px;
+    flex-grow: 1;
 }
 
 .card-inner-top {
@@ -168,10 +169,34 @@ main {
     transform: translate(0,-50%);
 }
 
+.save-icon {
+    transition: opacity 0.25s;
+}
+
+.save-icon:not(.hidden) {
+    opacity: 1;
+}
+
+.save-icon-first {
+    position: absolute;
+}
+
+.save-icon.hidden {
+    opacity: 0;
+}
+
 .save-icons:hover, .save-icon.fa-solid.fa-bookmark {
     color: red;
 }
 
 #recent {
     margin-top: 20px;
+}
+
+.card-source {
+    padding: 10px;
+    border-top: 1px solid darkgrey;
+    background-color: #F2F0EF;
+    border-radius: 0px 0px 5px 5px;
+    font-size: small;
 }
