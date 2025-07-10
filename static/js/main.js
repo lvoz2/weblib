@@ -1,3 +1,8 @@
+/* 
+ * Stumbled upon this recently. I've done some of its suggestions before, but its pretty neat
+ * https://youmightnotneedjquery.com/
+ */
+
 function toggleSave(e) {
     let target = e.target;
     if (target.innerHTML.length === 0) {

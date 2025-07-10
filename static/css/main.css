@@ -1,19 +1,35 @@
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/light-dark */
 :root {
+    color-scheme: light dark;
     --text-colour: light-dark(black, white);
-    --colour-1: light-dark(#D6D6D6, #353535);
-    --colour-2: light-dark(#5FA7AB, #2A4E50);
+    --colour-1: light-dark(white, #353535);
+    --colour-2: light-dark(#5FA7AB, #0E5181);
     --colour-3: light-dark(#44Af69, #28673E);
-    --colour-4: light-dark(#D9D9D9, #525252);
-    --colour-5: light-dark(#ADD7F6, #0E5181);
+    --colour-4: light-dark(#F2F0EF, #66615E);
+    --colour-5: light-dark(#ADD7F6, #2A4E50);
+    --colour-6: light-dark(darkgrey, lightgrey);
 }
 
 html {
     height: 100%;
 }
 
+* {
+    color: var(--text-colour);
+}
+
+.light {
+    color-scheme: light !important;
+}
+
+.dark {
+    color-scheme: dark !important;
+}
+
+/* Roboto font + styling from Google Fonts */
 body {
     margin: 0;
-    background-color: lightgrey;
+    background-color: var(--colour-4);
     font-family: "Roboto", sans-serif;
     font-optical-sizing: auto;
     font-weight: normal;
@@ -23,23 +39,23 @@ body {
 
 main {
     margin: 0 auto;
-    max-width: 800px;
-    background-color: white;
+    max-width: 1000px;
+    background-color: var(--colour-1);
     height: 100%;
 }
 
 .nav.list {
     display: flex;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--text-colour);
 }
 
 .nav.item {
     display: flex;
-    border-right: 1px solid black;
+    border-right: 1px solid var(--text-colour);
 }
 
 .nav.item a {
-    color: black;
+    color: var(--text-colour);
     text-decoration: none;
     padding: 15px;
 }
@@ -48,155 +64,10 @@ main {
     flex-grow: 1;
 }
 
-#search_container {
-    display: flex;
-    width: 100%;
-    padding: 5px;
-}
-
-#search_container > * {
-    max-height: 80%;
-    margin: auto;
-}
-
-#search_box {
-    border-top: 0px;
-    border-right: 0px;
-    border-bottom: 2px solid black;
-    border-left: 0px;
-    padding: 5px;
-}
-
-#search_btn {
-    height: 80%;
-    border: none;
-    background-color: var(--colour-2);
-    color: var(--text-colour);
-}
-
 #content {
     padding: 20px;
 }
 
-.link {
-    text-decoration: none;
-    color: black;
-    transition: padding-right 0.1s ease;
-    font-size: x-large;
-    font-weight: bold;
-}
-
-.link-container {
-    position: relative;
-    text-decoration: none;
-    font-size: large;
-}
-
-.link-container::before {
-    content: "";
-    width: 100%;
-    height: 1px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    background-color: black;
-}
-
-.arrow {
-    transition: 0.1s ease;
-    display: inline-block;
-}
-
-.link:hover {
-    padding-right: 10px;
-}
-
-.link:hover .arrow {
-    transform: translateX(10px);
-}
-
-.card {
-    margin-top: 10px;
-    border-radius: 5px 5px 5px 5px;
-    border: solid 1px black;
-    width: 200px;
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-}
-
-.card img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-.card h3 {
-    margin: 0;
-}
-
-.card p {
-    margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-clamp: 6;
-    -webkit-line-clamp: 6;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-}
-
-.card-inner-box {
-    padding: 10px;
-    flex-grow: 1;
-}
-
-.card-inner-top {
-    font-size: large;
-    height: 1.625rem
-}
-
-.card-inner-top h3 {
-    display: inline-block;
-}
-
-.save-icons {
-    color: black;
-    transition: color 0.3s;
-    float: right;
-    line-height: 1;
-    position: relative;
-    top: 50%;
-    transform: translate(0,-50%);
-}
-
-.save-icon {
-    transition: opacity 0.25s;
-}
-
-.save-icon:not(.hidden) {
-    opacity: 1;
-}
-
-.save-icon-first {
-    position: absolute;
-}
-
-.save-icon.hidden {
-    opacity: 0;
-}
-
-.save-icons:hover, .save-icon.fa-solid.fa-bookmark {
-    color: red;
-}
-
-#recent {
-    margin-top: 20px;
-}
-
-.card-source {
-    padding: 10px;
-    border-top: 1px solid darkgrey;
-    background-color: #F2F0EF;
-    border-radius: 0px 0px 5px 5px;
-    font-size: small;
+.nav.item.selected {
+    background-color: var(--colour-2);
 }

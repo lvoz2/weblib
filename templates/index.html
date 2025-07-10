@@ -1,68 +1,80 @@
 {% extends 'layout.html' %}
-{% block head %}
+{% block critical_files_preload %}
+<link rel="preload" href="{{ url_for('static', filename='css/index.css') }}" crossorigin="anonymous" as="style">
+{% endblock %}
+{% block preload_head %}
+{% if saved_items %}
 {% for item in saved_items %}
 <link rel="preload" href="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" as="image" type="{{item.thumb_mime}}">
 {% endfor %}
+{% endif %}
+{% if recent_items %}
+{% for item in recent_items %}
+<link rel="preload" href="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" as="image" type="{{item.thumb_mime}}">
+{% endfor %}
+{% endif %}
 {% endblock %}
+{% block critical_files %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+{% block selected_home %} selected{% endblock %}
 {% block content %}
-<div id="content">
-    <div id="saved">
-        <a class="link-container" href="/saved">
-            <span class="link">Saved <span class="arrow">&#8594</span></span>
-        </a>
-        {% if saved_items %}
-        <div class="item_list">
-        {% for item in saved_items %}
-        <div class="card">
-            <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
-            <div class="card-inner-box">
-                <div class="card-inner-top">
-                    <h3>{{ item.title }}</h3>
-                    <div class="save-icons">
-                        <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
-                        <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
-                    </div>
+<div id="saved">
+    <a class="link-container" href="/saved">
+        <span class="link">Saved <span class="arrow">&#8594</span></span>
+    </a>
+    {% if saved_items %}
+    <div class="item_list">
+    {% for item in saved_items %}
+    <div class="card">
+        <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+        <div class="card-inner-box">
+            <div class="card-inner-top">
+                <h3>{{ item.title }}</h3>
+                <div class="save-icons">
+                    <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
+                    <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
                 </div>
-                <p>{{ item.description }}</p>
             </div>
-            <div class="card-source">
-                <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
-            </div>
+            <p>{{ item.description }}</p>
         </div>
-        {% endfor %}
+        <div class="card-source">
+            <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
         </div>
-        {% else %}
-        <div class="help"></div>
-        {% endif %}
     </div>
-    <div id="recent">
-        <a class="link-container" href="/recent">
-            <span class="link">Recently Viewed <span class="arrow">&#8594</span></span>
-        </a>
-        {% if recent_items %}
-        <div class="item_list">
-        {% for item in recent_items %}
-        <div class="card">
-            <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
-            <div class="card-inner-box">
-                <div class="card-inner-top">
-                    <h3>{{ item.title }}</h3>
-                    <div class="save-icons">
-                        <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
-                        <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
-                    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="help"></div>
+    {% endif %}
+</div>
+<div id="recent">
+    <a class="link-container" href="/recent">
+        <span class="link">Recently Viewed <span class="arrow">&#8594</span></span>
+    </a>
+    {% if recent_items %}
+    <div class="item_list">
+    {% for item in recent_items %}
+    <div class="card">
+        <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+        <div class="card-inner-box">
+            <div class="card-inner-top">
+                <h3>{{ item.title }}</h3>
+                <div class="save-icons">
+                    <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark"></i>
+                    <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark"></i>
                 </div>
-                <p>{{ item.description }}</p>
             </div>
-            <div class="card-source">
-                <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
-            </div>
+            <p>{{ item.description }}</p>
         </div>
-        {% endfor %}
+        <div class="card-source">
+            <p>Source: <a href="{{ item.source.url }}">{{ item.source.name }}</a></p>
         </div>
-        {% else %}
-        <div class="help"></div>
-        {% endif %}
     </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="help"></div>
+    {% endif %}
 </div>
 {% endblock %}

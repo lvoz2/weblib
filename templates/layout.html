@@ -4,13 +4,16 @@
     <meta charset="UTF-8"></meta>
     <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
     <meta name="description" content="An online library of books for libraries">
+    <meta name="color-scheme" content="dark light" />
     <title>WebLib</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    <!-- Heavy influence from the McMaster-Carr website -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous">
     <link rel="preload" href="{{ url_for('static', filename='css/main.css') }}" crossorigin="anonymous" as="style">
     <link rel="preload" href="{{ url_for('static', filename='js/main.js') }}" crossorigin="anonymous" as="script">
+    {% block critical_files_preload %}{% endblock %}
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" crossorigin="anonymous" as="style">
     <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBA.woff2" crossorigin="anonymous" as="font" type="font/woff2">
     <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMawCUBGEe.woff2" crossorigin="anonymous" as="font" type="font/woff2">
@@ -18,11 +21,12 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" as="style">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-regular-400.woff2" crossorigin="anonymous" as="font" type="font/woff2">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-solid-900.woff2" crossorigin="anonymous" as="font" type="font/woff2">
-    {% block head %}{% endblock %}
+    {% block preload_head %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block critical_files %}{% endblock %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous">
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 <body>
     <main>
@@ -31,21 +35,23 @@
                 <div class="nav item logo">
                     <p>insert logo</p>
                 </div>
-                <div class="nav item">
+                <div class="nav item{% block selected_home %}{% endblock %}">
                     <a href="/">HOME</a>
                 </div>
-                <div class="nav item">
+                <div class="nav item{% block selected_browse %}{% endblock %}">
                     <a href="/browse">BROWSE</a>
                 </div>
-                <div class="nav item">
+                <div class="nav item{% block selected_query %}{% endblock %}">
                     <a href="/query">QUERY</a>
                 </div>
-                <div class="nav item">
+                <div class="nav item{% block selected_saved %}{% endblock %}">
                     <a href="/saved">SAVED</a>
                 </div>
             </div>
         </div>
-        {% block content %}{% endblock %}
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
     </main>
 </body>
 </html>

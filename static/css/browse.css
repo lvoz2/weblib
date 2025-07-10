@@ -1,0 +1,25 @@
+#search_container {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+}
+
+#search_container > * {
+    max-height: 80%;
+    margin: auto;
+}
+
+#search_box {
+    border-top: 0px;
+    border-right: 0px;
+    border-bottom: 2px solid var(--text-colour);
+    border-left: 0px;
+    padding: 5px;
+}
+
+#search_btn {
+    height: 80%;
+    border: none;
+    background-color: var(--colour-2);
+    color: var(--text-colour);
+}
