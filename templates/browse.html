@@ -11,7 +11,7 @@
 {% endblock %}
 {% block critical_files %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}">
-<script src="{{ url_for('static', filename='js/browse.js') }}" async defer></script>
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low">
 {% endblock %}
 {% block selected_browse %} selected{% endblock %}
@@ -28,7 +28,7 @@
     </div>
     <div id="resultsPane">
         <div id="resultsInner">
-            
+
         </div>
     </div>
 </div>

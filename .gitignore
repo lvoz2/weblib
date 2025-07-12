@@ -1,3 +1,7 @@
+# User data
+server.db
+static/cache/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

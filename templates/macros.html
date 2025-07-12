@@ -1,6 +1,6 @@
 {% macro card(item) %}
-<div class="card">
-    <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}">
+<div class="card" data-id="{{ item.id }}">
+    <img src="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" height="{{ item.thumb_height }}px" width="200px">
     <div class="card-inner-box">
         <div class="card-inner-top">
             <h3>{{ item.title }}</h3>
