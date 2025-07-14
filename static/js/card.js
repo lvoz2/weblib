@@ -30,13 +30,42 @@ export function wrapCards () {
     });
 }
 
-export function toggleSave(e) {
+export async function toggleSave(e) {
     let target = e.target;
     if (target.innerHTML.length === 0) {
         target = target.parentElement;
     }
-    for (let child of target.children) {
-        child.classList.toggle("hidden");
+    const itemId = target.parentElement.parentElement.parentElement.dataset.id;
+    const saveIcons = document.querySelectorAll(".card[data-id='" + itemId + "'] .save-icons");
+    for (let saveIcon of saveIcons) {
+        for (let child of saveIcon.children) {
+            child.classList.toggle("hidden");
+        }
+    }
+    if (target.querySelectorAll(".hidden")[0].classList.contains("fa-solid")) {
+        // Item is now not saved
+        const msg = await fetch("/api/item/unsave", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "item_id": itemId
+            })
+        });
+        console.log(msg);
+    } else {
+        // Item is now saved
+        const msg = await fetch("/api/item/save", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "item_id": itemId
+            })
+        });
+        console.log(msg);
     }
 }
 

@@ -44,16 +44,21 @@ function onMessage(e) {
     } else {
         // An error happened in auth
         const code = data[0].slice(6);
-        const desc = data[1].slice(18).replace("+", " ");
-        alert("An error has occured during login. Code: " + code + ". Description: " + desc);
+        if (code === "login_required" || code === "interaction_required") {
+            window.popup.postMessage("close");
+            login(undefined, "login")
+        } else {
+            const desc = data[1].slice(18).replace("+", " ");
+            alert("An error has occured during login. Code: " + code + ". Description: " + desc);
+        }
     }
 }
 
-function getIdToken(state, nonce) {
+function getIdToken(state, nonce, prompt) {
     const url = ("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
     + "client_id=" + clientId + "&response_type=id_token&redirect_uri="
     + redirectUri + "&response=form_post&scope=" + scopes + "&state=" + state
-    + "&nonce=" + nonce);
+    + "&prompt=" + prompt + "&nonce=" + nonce);
     window.addEventListener("message", onMessage);
     window.auth = {"state": state, "nonce": nonce};
     window.popup = window.open(url, "_blank");
@@ -62,14 +67,14 @@ function getIdToken(state, nonce) {
     }
 }
 
-function login() {
+function login(e, prompt="none") {
     let state = Math.floor(Math.random() * 1_000_000).toString();
     while (state.length < 6) {
         state = "0" + state;
     }
     state = state.slice(state.length - 6);
     const nonce = genString(32);
-    const code = getIdToken(state, nonce);
+    const code = getIdToken(state, nonce, prompt);
 }
 
 

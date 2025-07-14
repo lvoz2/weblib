@@ -76,8 +76,7 @@ def get_item(
             if user_id is not None:
                 user: Optional[User] = session.get(User, user_id)
                 if user is not None:
-                    is_saved = item.saved_by.index(user) >= 0
-
+                    is_saved = user in item.saved_by
             session.commit()
             return {
                 "id": str(item.id),
@@ -117,6 +116,35 @@ def get_or_create_user(platform: str, platform_id: dict[str, str]) -> User:
             return user[0]
         else:
             raise ValueError("Multiple users found with identical platform_id")
+
+
+def save_item(item_id: int, user_id: int) -> Optional[str]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        item: Optional[Item] = session.get(Item, item_id)
+        if user is None:
+            return f'User with id "{user_id}" does not exist'
+        if item is None:
+            return f'Item with id "{item_id}" does not exist'
+        user.saved_items.append(item)
+        session.commit()
+        return None
+
+
+def unsave_item(item_id: int, user_id: int) -> Optional[str]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        item: Optional[Item] = session.get(Item, item_id)
+        if user is None:
+            return f'User with id "{user_id}" does not exist'
+        if item is None:
+            return f'Item with id "{item_id}" does not exist'
+        try:
+            user.saved_items.remove(item)
+        except ValueError:
+            pass
+        session.commit()
+        return None
 
 
 if __name__ == "__main__":

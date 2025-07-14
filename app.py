@@ -62,7 +62,41 @@ def token() -> dict[str, bool]:
         return {"status": True}
     else:
         # Something bad happened
-        return {"status": False}
+        print(e)
+        return {"status": False, "error": e}
+
+
+@app.post("/api/item/save")
+def save_item() -> dict[str, bool | str]:
+    try:
+        item_id: int = flask.request.json["item_id"]
+        user_id: int = flask.session["user_id"]
+        msg = db.save_item(item_id, user_id)
+        if msg is None:
+            return {"status": True}
+        return {"status": False, "error": msg}
+    except Exception as e:
+        print(e)
+        return {"status": False, "error": str(e)}
+
+
+@app.post("/api/item/unsave")
+def unsave_item() -> dict[str, bool | str]:
+    try:
+        item_id: int = flask.request.json["item_id"]
+        user_id: int = flask.session["user_id"]
+        msg = db.unsave_item(item_id, user_id)
+        if msg is None:
+            return {"status": True}
+        return {"status": False, "error": msg}
+    except Exception as e:
+        print(e)
+        return {"status": False, "error": str(e)}
+
+
+@app.get("/api/item/save")
+def get_saved() -> dict[str, list[dict[str, str | bool | int | dict[str, str]]]]:
+    pass
 
 
 if __name__ == "__main__":
