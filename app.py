@@ -14,7 +14,6 @@ app = flask.Flask(__name__)
 @app.get("/index.html")
 def index() -> str:
     """index.html for site"""
-
     return flask.render_template(
         "index.html",
         saved_items=[db.get_item(1, 1)],
@@ -45,6 +44,25 @@ def search() -> dict[str, list[dict[str, str | bool | int | dict[str, str]]]]:
     json = flask.request.json
     print(json)
     return {"result": [db.get_item(1, 1)]}
+
+
+@app.get("/api/oidc/redirect")
+def redirect() -> str:
+    return flask.render_template("redirect.html")
+
+
+@app.post("/api/users/send")
+def token() -> dict[str, bool]:
+    json: dict[str, str | dict[str, str]] = flask.request.json
+    platform = json["platform"]
+    platform_id = json["platform_id"]
+    user = db.get_or_create_user(platform, platform_id)
+    if isinstance(user, db.User):
+        # Everything is good
+        return {"status": True}
+    else:
+        # Something bad happened
+        return {"status": False}
 
 
 if __name__ == "__main__":

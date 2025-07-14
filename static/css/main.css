@@ -65,3 +65,20 @@ main {
 .nav.item.selected {
     background-color: var(--colour-2);
 }
+
+.stretch {
+    flex-grow: 1;
+}
+
+.nav.item button {
+    color: var(--text-colour);
+    border: 0;
+    background-color: var(--colour-2);
+    padding: 15px;
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+    font-size: inherit;
+}

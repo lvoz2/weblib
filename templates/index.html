@@ -65,7 +65,6 @@
         const childHeight = child.clientHeight;
         const styles = window.getComputedStyle(child);
         const lines = Math.floor(parentHeight / (childHeight / styles["-webkit-line-clamp"]));
-        console.log(lines);
         if (lines === 0 || lines == Infinity) {
             child.style["display"] = "none";
             child.style["-webkit-line-clamp"] = 1;

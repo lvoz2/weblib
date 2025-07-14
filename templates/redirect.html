@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script>
+            window.addEventListener("message", (e) => {
+                if (e.data === "close") {
+                    window.close();
+                }
+            });
+            const data = window.location.toString().slice(40).split("&");
+            window.opener.postMessage(data, window.location);
+        </script>
+    </head>
+    <body>
+        <h1 style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">Redirecting...</h1>
+    </body>
+</html>

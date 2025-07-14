@@ -1,6 +1,7 @@
 import sqlalchemy
 from sqlalchemy import orm
-from typing import Optional
+from sqlalchemy.ext import mutable
+from typing import Optional, Sequence
 
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
@@ -47,13 +48,21 @@ class User(Base):
     __tablename__ = "users"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    login_platform: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(16))
+    platform_id: orm.Mapped[dict] = orm.mapped_column(
+        mutable.MutableDict.as_mutable(sqlalchemy.JSON)
+    )
     saved_items: orm.Mapped[list[Item]] = orm.relationship(
         secondary=users_to_saved, back_populates="saved_by"
     )
 
     def __repr__(self) -> str:
-        return f"User(id={self.id}, saved_items=" + str(
-            [f'"{item.title}" from {item.source_name}' for item in self.saved_items]
+        return (
+            f"User(id={self.id}, login_platform={self.login_platform},"
+            + f" platform_id={self.platform_id}, saved_items="
+            + str(
+                [f'"{item.title}" from {item.source_name}' for item in self.saved_items]
+            )
         )
 
 
@@ -86,3 +95,29 @@ def get_item(
         else:
             session.commit()
             return None
+
+
+def get_or_create_user(platform: str, platform_id: dict[str, str]) -> User:
+    with orm.Session(engine) as session:
+        user: Sequence[User] = session.scalars(
+            sqlalchemy.select(User)
+            .where(User.login_platform == platform)
+            .where(User.platform_id == platform_id)
+        ).all()
+        if len(user) == 0:
+            # No user, need to create one
+            new_user: User = User(login_platform=platform, platform_id=platform_id)
+            session.add(new_user)
+            session.commit()
+            print(new_user)
+            return new_user
+        elif len(user) == 1:
+            session.commit()
+            print(user[0])
+            return user[0]
+        else:
+            raise ValueError("Multiple users found with identical platform_id")
+
+
+if __name__ == "__main__":
+    pass
