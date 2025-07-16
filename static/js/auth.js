@@ -37,10 +37,10 @@ function onMessage(e) {
                 },
                 email: body.email,
             };
-            if (Object.hasOwnProperty.apply(body, "preferred_username")) {
+            if (Object.hasOwnProperty.call(body, "preferred_username")) {
                 fetchBody.username = body.preferred_username;
             }
-            if (Object.hasOwnProperty.apply(body, "name")) {
+            if (Object.hasOwnProperty.call(body, "name")) {
                 fetchBody.name = body.name;
             }
             fetch("/api/users/send", {

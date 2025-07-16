@@ -1,13 +1,14 @@
 """Entry Point of the website
 """
 
+import pathlib
 import flask
 import flask_sqlalchemy
 import flask_session
 from typing import Optional
 from src import db
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
 
 # Flask-Session setup
 flask_sql_db = flask_sqlalchemy.SQLAlchemy(model_class=db.Base)
