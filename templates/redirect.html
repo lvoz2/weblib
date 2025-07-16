@@ -7,7 +7,7 @@
                     window.close();
                 }
             });
-            const data = window.location.toString().slice(40).split("&");
+            const data = window.location.toString().slice(window.location.origin.length).slice(19).split("&");
             window.opener.postMessage(data, window.location);
         </script>
     </head>

@@ -1,7 +1,7 @@
+from typing import Any, Optional, Sequence
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.ext import mutable
-from typing import Any, Optional, Sequence
 
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
@@ -69,11 +69,36 @@ class User(Base):
         )
 
 
+def setup_db(include_test: bool = False) -> None:
+    Base.metadata.create_all(engine)
+    if include_test:
+        aus = Item(
+            title="Australia",
+            description="Australia, officially the Commonwealth of Australia, "
+            + "is a country comprising the mainland of the Australian continent, "
+            + "the island of Tasmania and numerous smaller islands. It has a "
+            + "total area of 7,688,287 km2 (2,968,464 sq mi), making it the "
+            + "sixth-largest country in the world and the largest in Oceania. "
+            + "Australia is the world's flattest and driest inhabited continent. "
+            + "It is a megadiverse country, and its size gives it a wide variety "
+            + "of landscapes and climates including deserts in the interior and "
+            + "tropical rainforests along the coast.",
+            thumb_ext="svg",
+            thumb_mime="image/svg+xml",
+            thumb_height=100,
+            source_url="https://en.wikipedia.org/wiki/Australia",
+            source_name="Wikipedia",
+        )
+        with orm.Session(engine) as session:
+            session.add(aus)
+            session.commit()
+
+
 def get_item(
-    id: int, user_id: Optional[int] = None
+    item_id: int, user_id: Optional[int] = None
 ) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
     with orm.Session(engine) as session:
-        item: Optional[Item] = session.get(Item, id)
+        item: Optional[Item] = session.get(Item, item_id)
         if item is not None:
             is_saved = False
             if user_id is not None:
