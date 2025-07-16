@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.ext import mutable
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
@@ -48,6 +48,9 @@ class User(Base):
     __tablename__ = "users"
 
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+    email: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(254))
+    name: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(254))
+    username: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(254))
     login_platform: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(16))
     platform_id: orm.Mapped[dict] = orm.mapped_column(
         mutable.MutableDict.as_mutable(sqlalchemy.JSON)
@@ -96,7 +99,14 @@ def get_item(
             return None
 
 
-def get_or_create_user(platform: str, platform_id: dict[str, str]) -> User:
+def get_or_create_user(
+    email: str,
+    platform: str,
+    platform_id: dict[str, str],
+    *args: Any,
+    name: Optional[str] = None,
+    username: Optional[str] = None,
+) -> User:
     with orm.Session(engine) as session:
         user: Sequence[User] = session.scalars(
             sqlalchemy.select(User)
@@ -105,7 +115,13 @@ def get_or_create_user(platform: str, platform_id: dict[str, str]) -> User:
         ).all()
         if len(user) == 0:
             # No user, need to create one
-            new_user: User = User(login_platform=platform, platform_id=platform_id)
+            new_user: User = User(
+                email=email,
+                login_platform=platform,
+                platform_id=platform_id,
+                name=name,
+                username=username,
+            )
             session.add(new_user)
             session.commit()
             print(new_user)

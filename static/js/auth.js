@@ -1,3 +1,5 @@
+"use strict";
+
 const clientId = "21b089d7-aa3e-478f-a992-9aa757adc73f";
 const redirectUri = encodeURIComponent(location.origin + "/api/oidc/redirect");
 const scopes = encodeURIComponent(["openid", "email", "profile"].join(" "));
@@ -27,18 +29,26 @@ function onMessage(e) {
             body.exp > time
         ) {
             // All parts of JWT body are good
+            let fetchBody = {
+                platform: "ms",
+                platform_id: {
+                    oid: body.oid,
+                    tid: body.tid
+                },
+                email: body.email,
+            };
+            if (Object.hasOwnProperty.apply(body, "preferred_username")) {
+                fetchBody.username = body.preferred_username;
+            }
+            if (Object.hasOwnProperty.apply(body, "name")) {
+                fetchBody.name = body.name;
+            }
             fetch("/api/users/send", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                "body": JSON.stringify({
-                    platform: "ms",
-                    platform_id: {
-                        oid: body.oid,
-                        tid: body.tid
-                    }
-                })
+                "body": JSON.stringify(fetchBody)
             });
         }
     } else {
