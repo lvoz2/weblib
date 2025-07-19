@@ -94,6 +94,24 @@ def setup_db(include_test: bool = False) -> None:
             session.commit()
 
 
+def item_to_json(
+    item: Item, is_saved: bool = False
+) -> dict[str, str | bool | int | dict[str, str]]:
+    return {
+        "id": str(item.id),
+        "title": item.title,
+        "description": item.description,
+        "thumb_ext": item.thumb_ext,
+        "thumb_mime": item.thumb_mime,
+        "thumb_height": item.thumb_height,
+        "saved": is_saved,
+        "source": {
+            "url": item.source_url,
+            "name": item.source_name,
+        },
+    }
+
+
 def get_item(
     item_id: int, user_id: Optional[int] = None
 ) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
@@ -106,19 +124,7 @@ def get_item(
                 if user is not None:
                     is_saved = user in item.saved_by
             session.commit()
-            return {
-                "id": str(item.id),
-                "title": item.title,
-                "description": item.description,
-                "thumb_ext": item.thumb_ext,
-                "thumb_mime": item.thumb_mime,
-                "thumb_height": item.thumb_height,
-                "saved": is_saved,
-                "source": {
-                    "url": item.source_url,
-                    "name": item.source_name,
-                },
-            }
+            return item_to_json(item, is_saved)
         else:
             session.commit()
             return None
@@ -157,6 +163,18 @@ def get_or_create_user(
             return user[0]
         else:
             raise ValueError("Multiple users found with identical platform_id")
+
+
+def get_saved_items(
+    user_id: int,
+) -> Optional[list[dict[str, str | bool | int | dict[str, str]]]]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        if user is not None:
+            if len(user.saved_items) == 0:
+                return None
+            return [item_to_json(item, True) for item in user.saved_items]
+        raise ValueError(f"No user with id {user_id} found")
 
 
 def save_item(item_id: int, user_id: int) -> Optional[str]:

@@ -24,9 +24,10 @@ flask_session.Session(app)
 def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
+    saved = None if user_id is None else db.get_saved_items(user_id)
     return flask.render_template(
         "index.html",
-        saved_items=[db.get_item(1, user_id)],
+        saved_items=saved,
         recent_items=[db.get_item(1, user_id)],
     )
 
@@ -86,7 +87,9 @@ def send() -> dict[str, bool | Exception]:
 def save_item() -> dict[str, bool | str]:
     try:
         item_id: int = flask.request.json["item_id"]
-        user_id: int = flask.session["user_id"]
+        user_id: Optional[int] = flask.session.get("user_id", None)
+        if user_id is None:
+            return {"status": False, "error": "Login to save items for later"}
         msg = db.save_item(item_id, user_id)
         if msg is None:
             return {"status": True}
@@ -100,7 +103,9 @@ def save_item() -> dict[str, bool | str]:
 def unsave_item() -> dict[str, bool | str]:
     try:
         item_id: int = flask.request.json["item_id"]
-        user_id: int = flask.session["user_id"]
+        user_id: Optional[int] = flask.session.get("user_id", None)
+        if user_id is None:
+            return {"status": False, "error": "Login to unsave items"}
         msg = db.unsave_item(item_id, user_id)
         if msg is None:
             return {"status": True}
@@ -108,11 +113,6 @@ def unsave_item() -> dict[str, bool | str]:
     except Exception as e:
         print(e)
         return {"status": False, "error": str(e)}
-
-
-@app.get("/api/item/save")
-def get_saved() -> dict[str, list[dict[str, str | bool | int | dict[str, str]]]]:
-    pass
 
 
 if __name__ == "__main__":

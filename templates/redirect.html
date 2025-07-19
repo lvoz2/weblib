@@ -8,7 +8,34 @@
                 }
             });
             const data = window.location.toString().slice(window.location.origin.length).slice(19).split("&");
-            window.opener.postMessage(data, window.location);
+            if (data[0][0] === "e") {
+                const code = data[0].slice(6);
+                if (code === "login_required" || code === "interaction_required") {
+                    let state = Math.floor(Math.random() * 1_000_000).toString();
+                    while (state.length < 6) {
+                        state = "0" + state;
+                    }
+                    state = state.slice(state.length - 6);
+                    // IIFE!
+                    const nonce = (() => {
+                        let result = "";
+                        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                        const charLength = chars.length;
+                        for (let i = 0; i < 32; i++) {
+                            result += chars.charAt(Math.floor(Math.random() * charLength));
+                        }
+                        return result;
+                    })();
+                    window.location = ("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
+                    + "client_id=21b089d7-aa3e-478f-a992-9aa757adc73f&response_type=id_token&redirect_uri="
+                    + window.location.origin + window.location.pathname + "&response=form_post&scope=openid%20email%20profile&state=" + state
+                    + "&prompt=login&nonce=" + nonce);
+                } else {
+                    window.opener.postMessage(data, window.location);
+                }
+            } else {
+                window.opener.postMessage(data, window.location);
+            }
         </script>
     </head>
     <body>
