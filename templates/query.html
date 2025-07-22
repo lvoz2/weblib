@@ -2,17 +2,10 @@
 {% block critical_files_preload %}
 <link rel="preload" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous" as="style">
 {% endblock %}
-{% block preload_head %}
-{% if results %}
-{% for item in results %}
-<link rel="preload" href="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" as="image" type="{{item.thumb_mime}}">
-{% endfor %}
-{% endif %}
-{% endblock %}
 {% block critical_files %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}">
-<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous">
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low" crossorigin="anonymous">
 {% endblock %}
 {% block selected_query %} selected{% endblock %}
 {% block content %}

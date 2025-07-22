@@ -53,14 +53,20 @@ main {
 }
 
 #filterPane {
-    width: 35.3%;
+    width: calc(35.3% - 20px);
     border-right: 1px solid var(--text-colour);
-    overflow-y: scroll;
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+#filterPane h2 {
+    margin: 10px 0;
+    padding: 0 10px;
 }
 
 #resultsPane {
     width: 64.6%;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 #resultsInner {
@@ -69,4 +75,29 @@ main {
     flex-wrap: wrap;
     column-gap: 10px;
     row-gap: 10px;
+}
+
+.filter-section {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: var(--colour-4);
+    border-radius: 5px 5px 5px 5px;
+}
+
+.filter-section h3 {
+    margin: 0;
+}
+
+.filter-not-title::before {
+    border-top: solid 1px var(--text-colour);
+    width: 100%;
+    height: 0;
+    content: "";
+    display: block;
+    margin: 5px 0;
+}
+
+.filter-options {
+    column-count: 2;
+    column-rule: 1px solid var(--text-colour);
 }

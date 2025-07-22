@@ -71,7 +71,7 @@ export async function toggleSave(e) {
 
 export function createCard(item) {
     const cardHTML = `<div class="card">
-        <img src="/static/cache/` + item.id + "/thumb." + item.thumb_ext + `" width="200px" height="` + item.thumb_height +`px">
+        <img src="` + item.thumb_url + `" width="200px" height="` + item.thumb_height +`px">
         <div class="card-inner-box">
             <div class="card-inner-top">
                 <h3>` + item.title + `</h3>

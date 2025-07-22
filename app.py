@@ -1,11 +1,14 @@
 """Entry Point of the website
 """
 
+import json
 import pathlib
 import flask
 import flask_sqlalchemy
 import flask_session
+import requests
 from typing import Optional
+from urllib import parse
 from src import db
 
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
@@ -35,7 +38,23 @@ def index() -> str:
 @app.get("/browse")
 def browse() -> str:
     """browse page for site"""
-    return flask.render_template("browse.html")
+    return flask.render_template(
+        "browse.html",
+        filters=[
+            {
+                "title": "Source",
+                "radio_id": "sourceRadio",
+                "name": "source",
+                "default": "wikipedia",
+                "type": "radio",
+                "options": [
+                    {"radio_id": "wikipedia", "name": "Wikipedia"},
+                    {"radio_id": "openLib", "name": "Open Library"},
+                    {"radio_id": "gbooks", "name": "Google Books"},
+                ],
+            }
+        ],
+    )
 
 
 @app.get("/query")
@@ -52,9 +71,38 @@ def saved() -> str:
 
 @app.post("/api/browse/search")
 def search() -> dict[str, list[dict[str, str | bool | int | dict[str, str]]]]:
-    json = flask.request.json
-    print(json)
-    return {"result": [db.get_item(1, 1)]}
+    data = flask.request.json
+    filters = json.loads(data["filters"])
+    num_results: int = data["num_results"]
+    query: str = parse.quote(data["query"])
+    if query == "":
+        raise ValueError("Query must not be empty")
+    results = []
+    match filters["source"]:
+        case "wikipedia":
+            url = f"https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&formatversion=2&srsearch={query}&srlimit={num_results}"
+            headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib)"}
+            response = requests.get(url, headers=headers)
+            pages = response.json()["query"]["search"]
+            print(pages)
+            thumb_res = requests.get(
+                f"https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pageids={'|'.join([str(page['pageid']) for page in pages])}&pithumbsize=200",
+                headers=headers,
+            )
+            thumb_json = thumb_res.json()
+            thumb_data = [
+                thumb_json["query"]["pages"][f"{page['pageid']}"] for page in pages
+            ]
+            # thumb_url = thumb_data["thumbnail"]["source"]
+            # thumb_height = thumb_data["thumbnail"]["height"]
+            print(thumb_data)
+        case "gbooks":
+            pass
+        case "openLib":
+            pass
+        case _:
+            raise ValueError("Source filter not in list of allowed values")
+    return {"results": [db.get_item(1, 1)]}
 
 
 @app.get("/api/oidc/redirect")

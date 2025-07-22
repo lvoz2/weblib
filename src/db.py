@@ -26,11 +26,12 @@ class Item(Base):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     title: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(255))
     description: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
-    thumb_ext: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(10))
+    thumb_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(10))
     thumb_mime: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(255))
     thumb_height: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
     source_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
     source_name: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(64))
+    source_id: orm.Mapped[int] = orm.mapped_column()
     saved_by: orm.Mapped[list["User"]] = orm.relationship(
         secondary=users_to_saved, back_populates="saved_items"
     )
@@ -38,7 +39,7 @@ class Item(Base):
     def __repr__(self) -> str:
         return (
             f"Item(id={self.id}, title={self.title}, description={self.description},"
-            + f" thumb_ext={self.thumb_ext}, thumb_mime={self.thumb_mime},"
+            + f" thumb_url={self.thumb_url}, thumb_mime={self.thumb_mime},"
             + f" thumb_height={self.thumb_height}, source_url={self.source_url},"
             + f" source_name={self.source_name})"
         )
@@ -83,11 +84,12 @@ def setup_db(include_test: bool = False) -> None:
             + "It is a megadiverse country, and its size gives it a wide variety "
             + "of landscapes and climates including deserts in the interior and "
             + "tropical rainforests along the coast.",
-            thumb_ext="svg",
+            thumb_url="http://localhost:5000/static/cache/1/thumb.svg",
             thumb_mime="image/svg+xml",
             thumb_height=100,
             source_url="https://en.wikipedia.org/wiki/Australia",
             source_name="Wikipedia",
+            source_id=4689264,
         )
         with orm.Session(engine) as session:
             session.add(aus)
@@ -101,7 +103,7 @@ def item_to_json(
         "id": str(item.id),
         "title": item.title,
         "description": item.description,
-        "thumb_ext": item.thumb_ext,
+        "thumb_url": item.thumb_url,
         "thumb_mime": item.thumb_mime,
         "thumb_height": item.thumb_height,
         "saved": is_saved,

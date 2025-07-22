@@ -2,17 +2,10 @@
 {% block critical_files_preload %}
 <link rel="preload" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous" as="style">
 {% endblock %}
-{% block preload_head %}
-{% if results %}
-{% for item in results %}
-<link rel="preload" href="{{ url_for('static', filename=('cache/' + item.id + '/thumb.' + item.thumb_ext)) }}" as="image" type="{{item.thumb_mime}}">
-{% endfor %}
-{% endif %}
-{% endblock %}
 {% block critical_files %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}">
-<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous">
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low" crossorigin="anonymous">
 {% endblock %}
 {% block selected_browse %} selected{% endblock %}
 {% block content %}
@@ -24,7 +17,22 @@
 </div>
 <div id="lowerBox">
     <div id="filterPane">
-
+        <h2>Search Filters</h2>
+        {% for filter in filters %}
+        <div class="filter-section">
+            <h3>{{ filter.title }}</h3>
+            <div class="filter-not-title">
+                <form class="filter-options" name="{{ filter.name }}" data-type="{{ filter.type }}">
+                    {% for option in filter.options %}
+                    <div class="filter-option">
+                        <input type="radio" id="{{ option.radio_id }}" name="{{ filter.name }}" value="{{ option.radio_id }}"{% if option.radio_id == filter.default %} checked{% endif %}>
+                        <label for="{{ option.radio_id }}">{{ option.name }}</label>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+        {% endfor %}
     </div>
     <div id="resultsPane">
         <div id="resultsInner">
