@@ -7,8 +7,12 @@ const scopes = encodeURIComponent(["openid", "email", "profile"].join(" "));
 function onMessage(e) {
     const data = e.data;
     window.data = e.data;
-    if (data[0][0] !== "e") {
-        // Success with EntraID
+    if (Object.hasOwnProperty.call(data, "state") && Object.hasOwnProperty.call(data, "nonce")) {
+        window.auth = {"state": data.state, "nonce": data.nonce};
+    } else if (Array.isArray(data) && data[0][0] !== "e") {
+        // Success with EntraID, works because of short circuit operators
+        // Short circuit meaning that if the first cond fails, second not computed
+        // because result already determined
         const idToken = data[0].slice(9);
         const returnState = data[1].slice(6);
         if (returnState.length == 6) {

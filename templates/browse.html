@@ -10,10 +10,11 @@
 {% block selected_browse %} selected{% endblock %}
 {% block content %}
 <div id="outerSearchBox">
-    <div id="searchContainer">
+    <!-- https://stackoverflow.com/questions/1818249/form-with-no-action-and-where-enter-does-not-reload-page -->
+    <form id="searchContainer" action="javascript:void(0);">
         <input type="text" id="searchBox" class="stretch" placeholder="Search..."></input>
-        <button id="searchBtn">Go</button>
-    </div>
+        <button type="submit" id="searchBtn">Go</button>
+    </form>
 </div>
 <div id="lowerBox">
     <div id="filterPane">

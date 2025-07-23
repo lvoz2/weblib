@@ -14,6 +14,9 @@
 
 .item-list {
     margin-top: 10px;
+    flex-direction: row;
+    display: flex;
+    column-gap: 10px;
 }
 
 /* Some from https://stackoverflow.com/questions/67323060/underline-and-arrow-on-link-animation-hover */

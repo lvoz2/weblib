@@ -26,6 +26,7 @@
                         }
                         return result;
                     })();
+                    window.opener.postMessage({"state": state, "nonce": nonce}, window.location)
                     window.location = ("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
                     + "client_id=21b089d7-aa3e-478f-a992-9aa757adc73f&response_type=id_token&redirect_uri="
                     + window.location.origin + window.location.pathname + "&response=form_post&scope=openid%20email%20profile&state=" + state

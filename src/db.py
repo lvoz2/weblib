@@ -107,10 +107,8 @@ def item_to_json(
         "thumb_mime": item.thumb_mime,
         "thumb_height": item.thumb_height,
         "saved": is_saved,
-        "source": {
-            "url": item.source_url,
-            "name": item.source_name,
-        },
+        "source_url": item.source_url,
+        "source_name": item.source_name,
     }
 
 
@@ -130,6 +128,49 @@ def get_item(
         else:
             session.commit()
             return None
+
+
+def get_item_by_source(
+    source_name: str, source_id: int, user_id: Optional[int] = None
+) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
+    with orm.Session(engine) as session:
+        item: Sequence[Item] = session.scalars(
+            sqlalchemy.select(Item)
+            .where(Item.source_name == source_name)
+            .where(Item.source_id == source_id)
+        ).all()
+        if len(item) == 0:
+            session.commit()
+            return None
+        elif len(item) == 1:
+            is_saved = False
+            if user_id is not None:
+                user: Optional[User] = session.get(User, user_id)
+                if user is not None:
+                    is_saved = user in item[0].saved_by
+            session.commit()
+            return item_to_json(item[0], is_saved)
+        else:
+            session.commit()
+            raise ValueError(
+                f"Too many items found from {source_name} with source_id {source_id}"
+            )
+
+
+def create_item(
+    item_data: dict[str, str | bool | int | dict[str, str]],
+    user_id: Optional[int] = None,
+) -> int:
+    with orm.Session(engine) as session:
+        item: Item = Item(**item_data)
+        session.add(item)
+        session.commit()
+        is_saved = False
+        if user_id is not None:
+            user: Optional[User] = session.get(User, user_id)
+            if user is not None:
+                is_saved = user in item.saved_by
+        return item_to_json(item, is_saved)
 
 
 def get_or_create_user(

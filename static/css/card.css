@@ -5,12 +5,12 @@
     height: 300px;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 /* MDN ref: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
 .card img {
     width: 100%;
-    height: auto;
     object-fit: contain;
     border-radius: 4px 4px 0px 0px;
 }
@@ -25,8 +25,8 @@
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-clamp: 6;
-    -webkit-line-clamp: 6;
+    line-clamp: 4;
+    -webkit-line-clamp: 4;
     display: -webkit-box;
     -webkit-box-orient: vertical;
 }
@@ -45,6 +45,10 @@
 
 .card-inner-top h3 {
     display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: calc(100% - round(up, calc(4ch / 3), 0.1px));
 }
 
 /* Fade transition from https://codepen.io/toaster99/pen/BpgzQR?editors=1100 */

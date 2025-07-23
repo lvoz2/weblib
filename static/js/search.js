@@ -5,7 +5,6 @@ function init() {
 }
 
 
-
 async function search(e) {
     const query = document.getElementById("searchBox").value;
     const filterEs = document.querySelectorAll(".filter-options");

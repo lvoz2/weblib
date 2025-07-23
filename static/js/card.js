@@ -53,7 +53,6 @@ export async function toggleSave(e) {
                 "item_id": itemId
             })
         });
-        console.log(msg);
     } else {
         // Item is now saved
         const msg = await fetch("/api/item/save", {
@@ -65,12 +64,11 @@ export async function toggleSave(e) {
                 "item_id": itemId
             })
         });
-        console.log(msg);
     }
 }
 
 export function createCard(item) {
-    const cardHTML = `<div class="card">
+    const cardHTML = `<div class="card" data-id="` + item.id + `" data-href="` + item.source_url + `">
         <img src="` + item.thumb_url + `" width="200px" height="` + item.thumb_height +`px">
         <div class="card-inner-box">
             <div class="card-inner-top">
@@ -85,13 +83,23 @@ export function createCard(item) {
             </div>
         </div>
         <div class="card-source">
-            <p>Source: <a href="` + item.source.url + '">' + item.source.name + `</a></p>
+            <p>Source: <a href="` + item.source_url + '">' + item.source_name + `</a></p>
         </div>
     </div>`;
     const div = document.createElement("div");
-    div.className = "card";
     div.innerHTML = cardHTML.trim();
     window.div = div;
+    div.querySelectorAll(".card").forEach((e) => {
+        e.addEventListener("click", (e) => {
+            let el = e.target;
+            while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
+                el = el.parentElement;
+            }
+            if (el.classList.contains("card")) {
+                window.location = el.dataset.href;
+            }
+        });
+    });
     div.querySelectorAll(".save-icons").forEach((e) => {
         e.addEventListener("click", toggleSave);
     });
@@ -99,6 +107,17 @@ export function createCard(item) {
 }
 
 export function init() {
+    document.querySelectorAll(".card").forEach((e) => {
+        e.addEventListener("click", (e) => {
+            let el = e.target;
+            while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
+                el = el.parentElement;
+            }
+            if (el.classList.contains("card")) {
+                window.location = el.dataset.href;
+            }
+        });
+    });
     document.querySelectorAll(".save-icons").forEach((e) => {
         e.addEventListener("click", toggleSave);
     });
