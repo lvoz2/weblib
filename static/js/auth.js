@@ -54,6 +54,8 @@ function onMessage(e) {
                 },
                 "body": JSON.stringify(fetchBody)
             });
+        } else {
+            throw new Error("JWT Bad. Content: " + JSON.stringify(body))
         }
     } else {
         // An error happened in auth

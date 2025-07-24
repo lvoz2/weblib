@@ -1,14 +1,13 @@
-"""Entry Point of the website
-"""
+"""Entry Point of the website"""
 
 import json
 import pathlib
+from typing import Optional
+from urllib import parse
 import flask
 import flask_sqlalchemy
 import flask_session
 import requests
-from typing import Optional
-from urllib import parse
 from src import db
 
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
@@ -27,10 +26,10 @@ flask_session.Session(app)
 def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
-    saved = None if user_id is None else db.get_saved_items(user_id)
+    saved_items = None if user_id is None else db.get_saved_items(user_id)
     return flask.render_template(
         "index.html",
-        saved_items=saved,
+        saved_items=saved_items,
         recent_items=[db.get_item(1, user_id)],
     )
 
@@ -58,7 +57,7 @@ def browse() -> str:
 
 
 @app.get("/query")
-def query() -> str:
+def query_page() -> str:
     """ask question page for site"""
     return flask.render_template("query.html")
 
@@ -70,14 +69,16 @@ def saved() -> str:
 
 
 @app.post("/api/browse/search")
-def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]]]]:
+def search() -> dict[str, bool | str | list[dict[str, str | bool | int | dict[str, str]]]]:
     user_id: Optional[int] = flask.session.get("user_id", None)
     data = flask.request.json
+    if data is None:
+        return {"status": False, "error": "No data provided"}
     filters = json.loads(data["filters"])
     num_results: int = data["num_results"]
     query: str = parse.quote(data["query"])
     if query == "":
-        return {"error": "Query must not be empty"}
+        return {"status": False, "error": "Query must not be empty"}
     results = []
     match filters["source"]:
         case "wikipedia":
@@ -87,7 +88,7 @@ def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]
                 + f"srsearch={query}&srlimit={num_results}"
             )
             headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib)"}
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=5.0)
             pages = response.json()["query"]["search"]
             page_ids = []
             items = {}
@@ -107,17 +108,17 @@ def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]
                 info_res = requests.get(
                     f"{api_url}action=query&prop=info&inprop=url&format=json&"
                     + f"pageids={page_ids_url}",
-                    headers=headers,
+                    headers=headers, timeout=5.0
                 )
                 thumb_res = requests.get(
                     f"{api_url}action=query&prop=pageimages&piprop=name|thumbnail&"
                     + f"pithumbsize=200&format=json&pageids={page_ids_url}",
-                    headers=headers,
+                    headers=headers, timeout=5.0
                 )
                 extract_res = requests.get(
                     "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&"
                     + f"explaintext&exintro&format=json&pageids={page_ids_url}",
-                    headers=headers,
+                    headers=headers, timeout=5.0
                 )
                 info_json = info_res.json()["query"]["pages"]
                 thumb_json = thumb_res.json()["query"]["pages"]
@@ -129,9 +130,12 @@ def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]
                     try:
                         # Smaller than the minimum
                         thumb_height = -1
+                        thumb_mime = ""
                         if has_thumb:
                             thumb_url = thumb_json[page_id]["thumbnail"]["source"]
-                            thumb_headers = requests.head(thumb_url, headers=headers)
+                            thumb_mime = (
+                                requests.head(thumb_url, headers=headers, timeout=5.0)
+                            ).headers["content-type"]
                             thumb_height = thumb_json[page_id]["thumbnail"]["height"]
                         # Clamps to 0-135px max img height. If no img, should be 0
                         thumb_height = max(0, min(135, thumb_height))
@@ -139,11 +143,7 @@ def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]
                             "title": page["title"],
                             "description": extract_json[page_id]["extract"],
                             "thumb_url": thumb_url if has_thumb else "",
-                            "thumb_mime": (
-                                thumb_headers.headers["content-type"]
-                                if has_thumb
-                                else ""
-                            ),
+                            "thumb_mime": (thumb_mime if has_thumb else ""),
                             "thumb_height": thumb_height,
                             "source_url": info_json[page_id]["fullurl"],
                             "source_name": "Wikipedia",
@@ -162,7 +162,7 @@ def search() -> dict[str, str | list[dict[str, str | bool | int | dict[str, str]
             pass
         case _:
             raise ValueError("Source filter not in list of allowed values")
-    return {"results": results}
+    return {"status": True, "results": results}
 
 
 @app.get("/api/oidc/redirect")
@@ -171,14 +171,29 @@ def redirect() -> str:
 
 
 @app.post("/api/users/send")
-def send() -> dict[str, bool | Exception]:
+def send() -> dict[str, bool | str]:
     try:
-        json: dict[str, str | dict[str, str]] = flask.request.json
-        email = json["email"]
-        name = json["name"] if "name" in json else None
-        username = json["username"] if "username" in json else None
-        platform = json["platform"]
-        platform_id = json["platform_id"]
+        data: Optional[dict[str, str | dict[str, str]]] = flask.request.json
+        if data is None:
+            return {"status": False, "error": "No data provided"}
+        email: Optional[str] = str(data["email"]) if "email" in data else None
+        name: Optional[str] = str(data["name"]) if "name" in data else None
+        username: Optional[str] = str(data["username"]) if "username" in data else None
+        platform: Optional[str] = str(data["platform"]) if "platform" in data else None
+        platform_id: Optional[dict[str, str] | str] = (
+            data["platform_id"] if "platform_id" in data else None
+        )
+        if isinstance(platform_id, str):
+            return {
+                "status": False,
+                "error": "platform_id must be provided as an object with key-value pairs",
+            }
+        if email is None:
+            return {"status": False, "error": "No email provided"}
+        if platform is None:
+            return {"status": False, "error": "No platform provided"}
+        if platform_id is None:
+            return {"status": False, "error": "No platform_id provided"}
         user = db.get_or_create_user(
             email, platform, platform_id, name=name, username=username
         )
@@ -188,16 +203,21 @@ def send() -> dict[str, bool | Exception]:
     except Exception as e:
         # Something bad happened
         print(e)
-        return {"status": False, "error": e}
+        return {"status": False, "error": str(e)}
 
 
 @app.post("/api/item/save")
 def save_item() -> dict[str, bool | str]:
     try:
-        item_id: int = flask.request.json["item_id"]
+        data = flask.request.json
+        if data is None:
+            return {"status": False, "error": "No data provided"}
+        item_id: Optional[int] = int(data["item_id"]) if "item_id" in data else None
         user_id: Optional[int] = flask.session.get("user_id", None)
         if user_id is None:
             return {"status": False, "error": "Login to save items for later"}
+        if item_id is None:
+            return {"status": False, "error": "Provide an item_id to save"}
         msg = db.save_item(item_id, user_id)
         if msg is None:
             return {"status": True}
@@ -210,10 +230,15 @@ def save_item() -> dict[str, bool | str]:
 @app.post("/api/item/unsave")
 def unsave_item() -> dict[str, bool | str]:
     try:
-        item_id: int = flask.request.json["item_id"]
+        data = flask.request.json
+        if data is None:
+            return {"status": False, "error": "No data provided"}
+        item_id: Optional[int] = int(data["item_id"]) if "item_id" in data else None
         user_id: Optional[int] = flask.session.get("user_id", None)
         if user_id is None:
             return {"status": False, "error": "Login to unsave items"}
+        if item_id is None:
+            return {"status": False, "error": "Provide an item_id to unsave"}
         msg = db.unsave_item(item_id, user_id)
         if msg is None:
             return {"status": True}

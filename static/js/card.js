@@ -67,6 +67,16 @@ export async function toggleSave(e) {
     }
 }
 
+function clickCard(e) {
+    let el = e.target;
+    while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
+        el = el.parentElement;
+    }
+    if (el.classList.contains("card")) {
+        window.open(el.dataset.href, "_blank");
+    }
+}
+
 export function createCard(item) {
     const cardHTML = `<div class="card" data-id="` + item.id + `" data-href="` + item.source_url + `">
         <img src="` + item.thumb_url + `" width="200px" height="` + item.thumb_height +`px">
@@ -90,15 +100,7 @@ export function createCard(item) {
     div.innerHTML = cardHTML.trim();
     window.div = div;
     div.querySelectorAll(".card").forEach((e) => {
-        e.addEventListener("click", (e) => {
-            let el = e.target;
-            while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
-                el = el.parentElement;
-            }
-            if (el.classList.contains("card")) {
-                window.location = el.dataset.href;
-            }
-        });
+        e.addEventListener("click", clickCard);
     });
     div.querySelectorAll(".save-icons").forEach((e) => {
         e.addEventListener("click", toggleSave);
@@ -106,17 +108,10 @@ export function createCard(item) {
     return div.children[0];
 }
 
+
 export function init() {
     document.querySelectorAll(".card").forEach((e) => {
-        e.addEventListener("click", (e) => {
-            let el = e.target;
-            while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
-                el = el.parentElement;
-            }
-            if (el.classList.contains("card")) {
-                window.location = el.dataset.href;
-            }
-        });
+        e.addEventListener("click", clickCard);
     });
     document.querySelectorAll(".save-icons").forEach((e) => {
         e.addEventListener("click", toggleSave);

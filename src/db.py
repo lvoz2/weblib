@@ -84,7 +84,7 @@ def setup_db(include_test: bool = False) -> None:
             + "It is a megadiverse country, and its size gives it a wide variety "
             + "of landscapes and climates including deserts in the interior and "
             + "tropical rainforests along the coast.",
-            thumb_url="http://localhost:5000/static/cache/1/thumb.svg",
+            thumb_url="/static/cache/1/thumb.svg",
             thumb_mime="image/svg+xml",
             thumb_height=100,
             source_url="https://en.wikipedia.org/wiki/Australia",
@@ -160,7 +160,7 @@ def get_item_by_source(
 def create_item(
     item_data: dict[str, str | bool | int | dict[str, str]],
     user_id: Optional[int] = None,
-) -> int:
+) -> dict[str, str | bool | int | dict[str, str]]:
     with orm.Session(engine) as session:
         item: Item = Item(**item_data)
         session.add(item)
@@ -177,7 +177,7 @@ def get_or_create_user(
     email: str,
     platform: str,
     platform_id: dict[str, str],
-    *args: Any,
+    *,
     name: Optional[str] = None,
     username: Optional[str] = None,
 ) -> User:
