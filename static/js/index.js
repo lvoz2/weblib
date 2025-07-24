@@ -1,3 +1,5 @@
+"use strict";
+
 /* 
  * Stumbled upon this recently. I've done some of its suggestions before, but its pretty neat
  * https://youmightnotneedjquery.com/

@@ -27,16 +27,19 @@ def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
     saved_items = None if user_id is None else db.get_saved_items(user_id)
+    logged_in: bool = user_id is not None
     return flask.render_template(
         "index.html",
         saved_items=saved_items,
         recent_items=[db.get_item(1, user_id)],
+        logged_in=logged_in
     )
 
 
 @app.get("/browse")
 def browse() -> str:
     """browse page for site"""
+    logged_in: bool = flask.session.get("user_id", None) is not None
     return flask.render_template(
         "browse.html",
         filters=[
@@ -53,19 +56,24 @@ def browse() -> str:
                 ],
             }
         ],
+        logged_in=logged_in
     )
 
 
 @app.get("/query")
 def query_page() -> str:
     """ask question page for site"""
-    return flask.render_template("query.html")
+    logged_in: bool = flask.session.get("user_id", None) is not None
+    return flask.render_template("query.html", logged_in=logged_in)
 
 
 @app.get("/saved")
 def saved() -> str:
     """saved items page for site"""
-    return flask.render_template("saved.html")
+    user_id: Optional[int] = flask.session.get("user_id", None)
+    logged_in: bool = user_id is not None
+    saved_items = None if user_id is None else db.get_saved_items(user_id)
+    return flask.render_template("saved.html", saved_items=saved_items, logged_in=logged_in)
 
 
 @app.post("/api/browse/search")
@@ -170,8 +178,8 @@ def redirect() -> str:
     return flask.render_template("redirect.html")
 
 
-@app.post("/api/users/send")
-def send() -> dict[str, bool | str]:
+@app.post("/api/users/login")
+def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int | dict[str, str]]]]]:
     try:
         data: Optional[dict[str, str | dict[str, str]]] = flask.request.json
         if data is None:
@@ -199,10 +207,26 @@ def send() -> dict[str, bool | str]:
         )
         app.session_interface.regenerate(flask.session)
         flask.session["user_id"] = user.id
-        return {"status": True}
+        try:
+            saved_items: Optional[list[dict[str, str | bool | int | dict[str, str]]]] = db.get_saved_items(user.id)
+        except ValueError as e:
+            return {"status": False, "error": "Failed to properly login"}
+        return {"status": True, "saved": saved_items}
     except Exception as e:
         # Something bad happened
         print(e)
+        return {"status": False, "error": str(e)}
+
+
+@app.get("/api/users/logout")
+def logout() -> dict[str, bool | str]:
+    try:
+        user_id: Optional[int] = flask.session.get("user_id", None)
+        if user_id is None:
+            return {"status": False, "error": "You must login to logout"}
+        flask.session.clear()
+        return {"status": True}
+    except Exception as e:
         return {"status": False, "error": str(e)}
 
 

@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence
+from typing import Optional, Sequence
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.ext import mutable

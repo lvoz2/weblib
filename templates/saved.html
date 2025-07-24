@@ -1,5 +1,68 @@
+{% import "macros.html" as macros %}
 {% extends 'layout.html' %}
+{% block critical_files_preload %}
+<link rel="preload" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" as="style">
+<link rel="preload" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous" as="style">
+{% endblock %}
+{% block preload_head %}
+{% if saved_items %}
+{% for item in saved_items %}
+<link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block critical_files %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous">
+{% endblock %}
 {% block selected_saved %} selected{% endblock %}
 {% block content %}
+{% if saved_items %}
+{% for item in saved_items %}
+{{ macros.card(item) }}
+{% endfor %}
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+    if (!window.app) {
+        window.app = {};
+    }
 
+    window.app.wrapCard = function(e) {
+        const child = e.children[0];
+        const parentHeight = e.clientHeight;
+        const childHeight = child.clientHeight;
+        const styles = window.getComputedStyle(child);
+        const lines = Math.floor(parentHeight / (childHeight / styles["-webkit-line-clamp"]));
+        if (lines === 0 || lines == Infinity) {
+            child.style["display"] = "none";
+            child.style["-webkit-line-clamp"] = 1;
+            child.style["line-clamp"] = 1;
+        } else {
+            child.style["display"] = "-webkit-box";
+            child.style["-webkit-line-clamp"] = lines;
+            child.style["line-clamp"] = lines;
+        }
+    }
+
+    window.app.wrapCards = function() {
+        cardInners = document.querySelectorAll(".card-description").forEach((e) => {
+            window.app.wrapCard(e)
+            // From MDN: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    window.app.wrapCard(entry.target)
+                }
+            });
+            resizeObserver.observe(e);
+        });
+    }
+
+    if (document.readyState !== "loading") {
+        window.app.wrapCards()
+    } else {
+        document.addEventListener("DOMContentLoaded", window.app.wrapCards);
+    }
+</script>
 {% endblock %}

@@ -1,10 +1,12 @@
 "use strict";
 
+import { wrapCards, createCard } from "./card.js";
+
 const clientId = "21b089d7-aa3e-478f-a992-9aa757adc73f";
 const redirectUri = encodeURIComponent(location.origin + "/api/oidc/redirect");
 const scopes = encodeURIComponent(["openid", "email", "profile"].join(" "));
 
-function onMessage(e) {
+async function onMessage(e) {
     const data = e.data;
     window.data = e.data;
     if (Object.hasOwnProperty.call(data, "state") && Object.hasOwnProperty.call(data, "nonce")) {
@@ -47,13 +49,30 @@ function onMessage(e) {
             if (Object.hasOwnProperty.call(body, "name")) {
                 fetchBody.name = body.name;
             }
-            fetch("/api/users/send", {
+            const data = await (await fetch("/api/users/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 "body": JSON.stringify(fetchBody)
-            });
+            })).json();
+            if (data.status) { 
+                document.getElementById("login").innerText = "LOGOUT";
+                const saved = data.saved;
+                if (saved != null) {
+                    switch (window.location.pathname) {
+                        case "/":
+                            const savedE = document.querySelectorAll("#saved .item-list")[0];
+                            savedE.innerHTML = "";
+                            for (const item of saved) {
+                                const card = createCard(item);
+                                savedE.append(card);
+                            }
+                            wrapCards()
+                            break;
+                    }
+                }
+            }
         } else {
             throw new Error("JWT Bad. Content: " + JSON.stringify(body))
         }
@@ -78,16 +97,25 @@ function getIdToken(state, nonce) {
     }
 }
 
-function login() {
-    let state = Math.floor(Math.random() * 1_000_000).toString();
-    while (state.length < 6) {
-        state = "0" + state;
+function toggleLogin(e) {
+    if (e.target.innerText == "LOGIN") {
+        let state = Math.floor(Math.random() * 1_000_000).toString();
+        while (state.length < 6) {
+            state = "0" + state;
+        }
+        state = state.slice(state.length - 6);
+        const nonce = genString(32);
+        const code = getIdToken(state, nonce);
+    } else {
+        fetch("/api/users/logout");
+        document.getElementById("login").innerText = "LOGIN";
+        switch (window.location.pathname) {
+            case "/":
+                document.querySelectorAll("#saved .item-list")[0].innerHTML = "";
+                break;
+        }
     }
-    state = state.slice(state.length - 6);
-    const nonce = genString(32);
-    const code = getIdToken(state, nonce);
 }
-
 
 // Taken from https://stackoverflow.com/questions/1349404/generate-a-string-of-random-characters
 function genString(length) {
@@ -101,7 +129,7 @@ function genString(length) {
 }
 
 function init() {
-    document.getElementById("login").addEventListener("click", login);
+    document.getElementById("login").addEventListener("click", toggleLogin);
 }
 
 if (document.readyState !== "loading") {

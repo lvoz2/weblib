@@ -1,3 +1,5 @@
+"use strict";
+
 import { wrapCards, createCard } from "./card.js";
 
 function init() {
