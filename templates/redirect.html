@@ -2,11 +2,6 @@
 <html>
     <head>
         <script>
-            window.addEventListener("message", (e) => {
-                if (e.data === "close") {
-                    window.close();
-                }
-            });
             const data = window.location.toString().slice(window.location.origin.length).slice(19).split("&");
             if (data[0][0] === "e") {
                 const code = data[0].slice(6);

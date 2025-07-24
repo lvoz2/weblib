@@ -16,7 +16,7 @@ function onMessage(e) {
         const idToken = data[0].slice(9);
         const returnState = data[1].slice(6);
         if (returnState.length == 6) {
-            window.popup.postMessage("close");
+            window.popup.close();
         }
         const jwtParts = idToken.split(".");
         window.parts = jwtParts;
