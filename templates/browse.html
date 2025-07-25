@@ -24,12 +24,21 @@
             <h3>{{ filter.title }}</h3>
             <div class="filter-not-title">
                 <form class="filter-options" name="{{ filter.name }}" data-type="{{ filter.type }}">
+                    {% if filter.type == "radio" %}
                     {% for option in filter.options %}
                     <div class="filter-option">
-                        <input type="radio" id="{{ option.radio_id }}" name="{{ filter.name }}" value="{{ option.radio_id }}"{% if option.radio_id == filter.default %} checked{% endif %}>
-                        <label for="{{ option.radio_id }}">{{ option.name }}</label>
+                        <input type="radio" id="{{ option.id }}" name="{{ filter.name }}" value="{{ option.id }}"{% if option.id == filter.default %} checked{% endif %}>
+                        <label for="{{ option.id }}">{{ option.name }}</label>
                     </div>
                     {% endfor %}
+                    {% elif filter.type == "range" %}
+                    <div class="filter-option">
+                        <input type="range" id="{{ filter.id }}" name="{{ filter.name }}" min="{{ filter.min }}" max="{{ filter.max }}" value="{{ filter.default }}" step="{{ filter.step }}">
+                        <div class="filter-range-label">
+                            <label id="{{ filter.id }}Label" for="{{ filter.id }}">{{ filter.default }}</label>
+                        </div>
+                    </div>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -41,4 +50,20 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+    // IIFE because this kills variables after finishing
+    (function() {
+        let init = function() {
+            let el = document.getElementById("resultsSlider");
+            el.nextElementSibling.children[0].innerText = el.value;
+        }
+        if (document.readyState !== "loading") {
+            init()
+        } else {
+            document.addEventListener("DOMContentLoaded", init);
+        }
+    })();
+</script>
 {% endblock %}

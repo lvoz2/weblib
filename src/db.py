@@ -1,8 +1,8 @@
 from typing import Any, Optional, Sequence
+
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.ext import mutable
-
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
 

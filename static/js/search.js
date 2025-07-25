@@ -3,7 +3,8 @@
 import { wrapCards, createCard } from "./card.js";
 
 function init() {
-    document.getElementById("searchBtn").addEventListener("click", search)
+    document.getElementById("searchBtn").addEventListener("click", search);
+    document.getElementById("resultsSlider").addEventListener("input", resultsSlider);
 }
 
 
@@ -18,6 +19,7 @@ async function search(e) {
                 break;
         }
     }
+    const num_results = parseInt(document.getElementById("resultsSliderLabel").innerText);
     const json = await fetch("/api/browse/search", {
         method: "POST",
         headers: {
@@ -25,7 +27,7 @@ async function search(e) {
         },
         body: JSON.stringify({
             "query": query,
-            num_results: 5,
+            num_results: num_results,
             filters: filterData
         })
     }).then(res => res.json()).then(json => {
@@ -41,6 +43,10 @@ async function search(e) {
         resultsE.append(card);
     }
     wrapCards()
+}
+
+function resultsSlider(e) {
+    e.target.nextElementSibling.children[0].innerText = e.target.value;
 }
 
 if (document.readyState !== "loading") {

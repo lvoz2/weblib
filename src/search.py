@@ -1,6 +1,7 @@
 """Collection of functions to search various 3rd-party sites"""
 
 from typing import Optional
+
 import requests
 from src import db
 

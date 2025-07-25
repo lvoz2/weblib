@@ -3,10 +3,12 @@
 import pathlib
 from typing import Optional
 from urllib import parse
+
 import flask
-import flask_sqlalchemy
 import flask_session
-from src import db, search as search_funcs
+import flask_sqlalchemy
+from src import db
+from src import search as search_funcs
 
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
 
@@ -43,16 +45,27 @@ def browse() -> str:
         filters=[
             {
                 "title": "Source",
-                "radio_id": "sourceRadio",
+                "id": "sourceRadio",
                 "name": "source",
                 "default": "wikipedia",
                 "type": "radio",
                 "options": [
-                    {"radio_id": "wikipedia", "name": "Wikipedia"},
-                    {"radio_id": "openLib", "name": "Open Library"},
-                    {"radio_id": "gbooks", "name": "Google Books"},
+                    {"id": "wikipedia", "name": "Wikipedia"},
+                    {"id": "wiktionary", "name": "Wiktionary"},
+                    {"id": "openLib", "name": "Open Library"},
+                    {"id": "gbooks", "name": "Google Books"},
                 ],
-            }
+            },
+            {
+                "title": "Number of Results",
+                "id": "resultsSlider",
+                "name": "Number of Results: ",
+                "default": 5,
+                "type": "range",
+                "min": 1,
+                "max": 20,
+                "step": 1,
+            },
         ],
         logged_in=logged_in,
     )
@@ -125,7 +138,8 @@ def send() -> (
         if isinstance(platform_id, str):
             return {
                 "status": False,
-                "error": "platform_id must be provided as an object with key-value pairs",
+                "error": "platform_id must be provided as an object with "
+                + "key-value pairs",
             }
         if email is None:
             return {"status": False, "error": "No email provided"}
@@ -144,7 +158,7 @@ def send() -> (
             saved_items: Optional[
                 list[dict[str, str | bool | int | dict[str, str]]]
             ] = db.get_saved_items(user["id"])
-        except ValueError as e:
+        except ValueError:
             return {"status": False, "error": "Failed to properly login"}
         return {"status": True, "saved": saved_items}
     except Exception as e:
