@@ -82,7 +82,7 @@ def search() -> dict[str, bool | str | list[dict[str, str | bool | int | dict[st
     data = flask.request.json
     if data is None:
         return {"status": False, "error": "No data provided"}
-    filters = json.loads(data["filters"])
+    filters = data["filters"]
     num_results: int = data["num_results"]
     query: str = parse.quote(data["query"])
     if query == "":
@@ -106,10 +106,8 @@ def search() -> dict[str, bool | str | list[dict[str, str | bool | int | dict[st
                 )
                 page_id: str = str(page["pageid"])
                 if item is None:
-                    print("not", page_id)
                     page_ids.append(page_id)
                 else:
-                    print("found", page_id)
                     items[page_id] = item
             if len(page_ids) != 0:
                 page_ids_url = "|".join(page_ids)

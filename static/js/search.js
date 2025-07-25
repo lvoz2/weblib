@@ -26,7 +26,7 @@ async function search(e) {
         body: JSON.stringify({
             "query": query,
             num_results: 5,
-            filters: JSON.stringify(filterData)
+            filters: filterData
         })
     }).then(res => res.json()).then(json => {
         return json;

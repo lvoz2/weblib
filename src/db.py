@@ -176,11 +176,9 @@ def get_or_create_user(
             )
             session.add(new_user)
             session.commit()
-            print(new_user)
             return new_user
         elif len(user) == 1:
             session.commit()
-            print(user[0])
             return user[0]
         else:
             raise ValueError("Multiple users found with identical platform_id")
