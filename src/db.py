@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Any, Optional, Sequence
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy.ext import mutable
@@ -36,6 +36,21 @@ class Item(Base):
         secondary=users_to_saved, back_populates="saved_items"
     )
 
+    def to_dict(
+        self, is_saved: bool = False
+    ) -> dict[str, str | bool | int | dict[str, str]]:
+        return {
+            "id": str(self.id),
+            "title": self.title,
+            "description": self.description,
+            "thumb_url": self.thumb_url,
+            "thumb_mime": self.thumb_mime,
+            "thumb_height": self.thumb_height,
+            "saved": is_saved,
+            "source_url": self.source_url,
+            "source_name": self.source_name,
+        }
+
     def __repr__(self) -> str:
         return (
             f"Item(id={self.id}, title={self.title}, description={self.description},"
@@ -53,12 +68,35 @@ class User(Base):
     name: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(254))
     username: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(254))
     login_platform: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(16))
-    platform_id: orm.Mapped[dict] = orm.mapped_column(
+    platform_id: orm.Mapped[dict[str, Any]] = orm.mapped_column(
         mutable.MutableDict.as_mutable(sqlalchemy.JSON)
     )
     saved_items: orm.Mapped[list[Item]] = orm.relationship(
         secondary=users_to_saved, back_populates="saved_by"
     )
+
+    def to_dict(self, include_saved: bool = False) -> dict[
+        str,
+        int | str | dict[str, Any] | list[dict[str, str | bool | int | dict[str, str]]],
+    ]:
+        if include_saved:
+            return {
+                "id": self.id,
+                "email": self.email,
+                "name": self.name,
+                "username": self.username,
+                "login_platform": self.login_platform,
+                "platform_id": self.platform_id,
+                "saved_items": [item.to_dict() for item in self.saved_items],
+            }
+        return {
+            "id": self.id,
+            "email": self.email,
+            "name": self.name,
+            "username": self.username,
+            "login_platform": self.login_platform,
+            "platform_id": self.platform_id,
+        }
 
     def __repr__(self) -> str:
         return (
@@ -74,22 +112,6 @@ def setup_db() -> None:
     Base.metadata.create_all(engine)
 
 
-def item_to_json(
-    item: Item, is_saved: bool = False
-) -> dict[str, str | bool | int | dict[str, str]]:
-    return {
-        "id": str(item.id),
-        "title": item.title,
-        "description": item.description,
-        "thumb_url": item.thumb_url,
-        "thumb_mime": item.thumb_mime,
-        "thumb_height": item.thumb_height,
-        "saved": is_saved,
-        "source_url": item.source_url,
-        "source_name": item.source_name,
-    }
-
-
 def get_item(
     item_id: int, user_id: Optional[int] = None
 ) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
@@ -102,7 +124,7 @@ def get_item(
                 if user is not None:
                     is_saved = user in item.saved_by
             session.commit()
-            return item_to_json(item, is_saved)
+            return item.to_dict(is_saved)
         else:
             session.commit()
             return None
@@ -127,7 +149,7 @@ def get_item_by_source(
                 if user is not None:
                     is_saved = user in item[0].saved_by
             session.commit()
-            return item_to_json(item[0], is_saved)
+            return item[0].to_dict(is_saved)
         else:
             session.commit()
             raise ValueError(
@@ -148,7 +170,7 @@ def create_item(
             user: Optional[User] = session.get(User, user_id)
             if user is not None:
                 is_saved = user in item.saved_by
-        return item_to_json(item, is_saved)
+        return item.to_dict(is_saved)
 
 
 def get_or_create_user(
@@ -158,7 +180,10 @@ def get_or_create_user(
     *,
     name: Optional[str] = None,
     username: Optional[str] = None,
-) -> User:
+) -> dict[
+    str,
+    int | str | dict[str, Any] | list[dict[str, str | bool | int | dict[str, str]]],
+]:
     with orm.Session(engine) as session:
         user: Sequence[User] = session.scalars(
             sqlalchemy.select(User)
@@ -176,10 +201,10 @@ def get_or_create_user(
             )
             session.add(new_user)
             session.commit()
-            return new_user
+            return new_user.to_dict()
         elif len(user) == 1:
             session.commit()
-            return user[0]
+            return user[0].to_dict()
         else:
             raise ValueError("Multiple users found with identical platform_id")
 
@@ -192,7 +217,7 @@ def get_saved_items(
         if user is not None:
             if len(user.saved_items) == 0:
                 return None
-            return [item_to_json(item, True) for item in user.saved_items]
+            return [item.to_dict(True) for item in user.saved_items]
         raise ValueError(f"No user with id {user_id} found")
 
 

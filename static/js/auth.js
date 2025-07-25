@@ -108,12 +108,8 @@ function toggleLogin(e) {
         const code = getIdToken(state, nonce);
     } else {
         fetch("/api/users/logout");
-        document.getElementById("login").innerText = "LOGIN";
-        switch (window.location.pathname) {
-            case "/":
-                document.querySelectorAll("#saved .item-list")[0].innerHTML = "";
-                break;
-        }
+        const url = "https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=" + encodeURIComponent(window.location);
+        window.location = url;
     }
 }
 
