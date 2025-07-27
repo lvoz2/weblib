@@ -180,7 +180,7 @@ class User(Base):
 
 
 def get_recently_viewed(
-    user_id: int,
+    user_id: Optional[int],
 ) -> list[dict[str, str | bool | int | dict[str, str]]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
@@ -195,7 +195,7 @@ def get_recently_viewed(
 
 
 def get_recently_searched(
-    user_id: int,
+    user_id: Optional[int],
 ) -> list[dict[str, str | bool | int | dict[str, str]]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)

@@ -17,7 +17,7 @@
     flex-direction: row;
     display: flex;
     column-gap: 10px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 /* Some from https://stackoverflow.com/questions/67323060/underline-and-arrow-on-link-animation-hover */

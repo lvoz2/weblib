@@ -8,9 +8,9 @@
             "type": "radio",
             "options": [
                 {"id": "wikipedia", "name": "Wikipedia"},
-                {"id": "wiktionary", "name": "Wiktionary"},
-                {"id": "openLib", "name": "Open Library"},
-                {"id": "gbooks", "name": "Google Books"}
+                {"id": "wiktionary", "name": "Wiktionary DO NOT USE"},
+                {"id": "gbooks", "name": "Google Books"},
+                {"id": "openLib", "name": "Open Library DO NOT USE"}
             ],
             "shown_source": null
         },

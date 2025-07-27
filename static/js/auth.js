@@ -68,10 +68,36 @@ async function onMessage(e) {
                                 const card = createCard(item);
                                 savedE.append(card);
                             }
-                            wrapCards()
                             break;
                     }
                 }
+                const recentlyViewed = data.recently_viewed;
+                if (recentlyViewed != null) {
+                    switch (window.location.pathname) {
+                        case "/":
+                            const recentlyViewedE = document.querySelectorAll("#recentView .item-list")[0];
+                            recentlyViewedE.innerHTML = "";
+                            for (const item of recentlyViewed) {
+                                const card = createCard(item);
+                                recentlyViewedE.append(card);
+                            }
+                            break;
+                    }
+                }
+                const recentlySearched = data.recently_searched;
+                if (recentlySearched != null) {
+                    switch (window.location.pathname) {
+                        case "/":
+                            const recentlySearchedE = document.querySelectorAll("#recentSearch .item-list")[0];
+                            recentlySearchedE.innerHTML = "";
+                            for (const item of recentlySearched) {
+                                const card = createCard(item);
+                                recentlySearchedE.append(card);
+                            }
+                            break;
+                    }
+                }
+                wrapCards()
             }
         } else {
             throw new Error("JWT Bad. Content: " + JSON.stringify(body))

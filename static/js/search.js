@@ -34,6 +34,10 @@ async function search(e) {
                 break;
         }
     }
+    if (filterData.source === "wiktionary" || filterData.source === "openLib") {
+        alert("This search source is not implemented yet! Please use something else.")
+        return
+    }
     const num_results = parseInt(document.getElementById("resultsSliderLabel").innerText);
     const json = await fetch("/api/browse/search", {
         method: "POST",

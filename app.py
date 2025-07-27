@@ -21,7 +21,7 @@ app.config["SESSION_TYPE"] = "sqlalchemy"
 app.config["SESSION_SQLALCHEMY"] = flask_sql_db
 flask_session.Session(app)
 
-with open("src/filters.json", "r") as f:
+with open("src/filters.json", "r", encoding="utf-8") as f:
     filter_control = json.load(f)["filters"]
 
 
@@ -145,7 +145,7 @@ def send() -> (
             ] = db.get_saved_items(user["id"])
         except ValueError:
             return {"status": False, "error": "Failed to properly login"}
-        return {"status": True, "saved": saved_items}
+        return {"status": True, "saved": saved_items, "recently_viewed": db.get_recently_viewed(user["id"]), "recently_searched": db.get_recently_searched(user["id"])}
     except Exception as e:
         # Something bad happened
         print(e)

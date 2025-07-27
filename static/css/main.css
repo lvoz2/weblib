@@ -37,9 +37,21 @@ body {
     font-variation-settings: "wdth" 100;
 }
 
+@media (max-width: 606px) {
+    main {
+        max-width: 454.5px;
+        width: 100vw;
+    }
+}
+
+@media (min-width: 606px) {
+    main {
+        width: 75vw;
+    }
+}
+
 main {
     margin: 0 auto;
-    max-width: 1000px;
     background-color: var(--colour-1);
     height: 100%;
     min-height: 100vh;
