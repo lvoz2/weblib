@@ -1,8 +1,9 @@
+import datetime
 from typing import Any, Optional, Sequence
 
 import sqlalchemy
 from sqlalchemy import orm
-from sqlalchemy.ext import mutable
+from sqlalchemy.ext import mutable, associationproxy
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
 
@@ -18,6 +19,50 @@ users_to_saved = sqlalchemy.Table(
     sqlalchemy.Column("user_id", sqlalchemy.ForeignKey("users.id"), primary_key=True),
     sqlalchemy.Column("item_id", sqlalchemy.ForeignKey("items.id"), primary_key=True),
 )
+
+
+class UserToRecentlyViewed(Base):
+    __tablename__ = "users_to_recent_view"
+
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("users.id"), primary_key=True
+    )
+    item_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("items.id"), primary_key=True
+    )
+    user: orm.Mapped["User"] = orm.relationship(
+        back_populates="user_recent_viewed_assoc"
+    )
+    item: orm.Mapped["Item"] = orm.relationship()
+    time_inserted: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
+
+    def __repr__(self) -> str:
+        return (
+            f"UserToRecentlyViewed(user_id={self.user_id}, item_id={self.item_id},"
+            + f" time_inserted={self.time_inserted})"
+        )
+
+
+class UserToRecentlySearched(Base):
+    __tablename__ = "users_to_recent_search"
+
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("users.id"), primary_key=True
+    )
+    item_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("items.id"), primary_key=True
+    )
+    user: orm.Mapped["User"] = orm.relationship(
+        back_populates="user_recent_search_assoc"
+    )
+    item: orm.Mapped["Item"] = orm.relationship()
+    time_inserted: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
+
+    def __repr__(self) -> str:
+        return (
+            f"UserToRecentlySearched(user_id={self.user_id}, item_id={self.item_id},"
+            + f" time_inserted={self.time_inserted})"
+        )
 
 
 class Item(Base):
@@ -75,6 +120,31 @@ class User(Base):
     saved_items: orm.Mapped[list[Item]] = orm.relationship(
         secondary=users_to_saved, back_populates="saved_by"
     )
+    recently_viewed: associationproxy.AssociationProxy[list[Item]] = (
+        associationproxy.association_proxy(
+            "user_recent_viewed_assoc",
+            "item",
+        )
+    )
+    recently_searched: associationproxy.AssociationProxy[list[Item]] = (
+        associationproxy.association_proxy(
+            "user_recent_search_assoc",
+            "item",
+        )
+    )
+
+    user_recent_search_assoc: orm.Mapped[list[UserToRecentlySearched]] = (
+        orm.relationship(
+            back_populates="user",
+            cascade="all, delete-orphan",
+        )
+    )
+    user_recent_viewed_assoc: orm.Mapped[list[UserToRecentlyViewed]] = orm.relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    recent_max_len: int = 20
 
     def to_dict(self, include_saved: bool = False) -> dict[
         str,
@@ -109,6 +179,100 @@ class User(Base):
         )
 
 
+def get_recently_viewed(
+    user_id: int,
+) -> list[dict[str, str | bool | int | dict[str, str]]]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        if user is None:
+            return []
+        data: list[UserToRecentlyViewed] = sorted(
+            user.user_recent_viewed_assoc,
+            key=lambda assoc: assoc.time_inserted,
+            reverse=True,
+        )[: user.recent_max_len]
+        return [assoc.item.to_dict(assoc.item in user.saved_items) for assoc in data]
+
+
+def get_recently_searched(
+    user_id: int,
+) -> list[dict[str, str | bool | int | dict[str, str]]]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        if user is None:
+            return []
+        data: list[UserToRecentlySearched] = sorted(
+            user.user_recent_search_assoc,
+            key=lambda assoc: assoc.time_inserted,
+            reverse=True,
+        )[: user.recent_max_len]
+        return [assoc.item.to_dict(assoc.item in user.saved_items) for assoc in data]
+
+
+def append_to_recently_viewed(user_id: int, item_id: int) -> Optional[str]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        if user is None:
+            return "user_id not valid"
+        item: Optional[Item] = session.get(Item, item_id)
+        if item is None:
+            return "item_id not valid"
+        time: int = int(
+            datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).timestamp()
+            * 1000000
+        )
+        item_assoc: UserToRecentlyViewed = UserToRecentlyViewed(
+            user=user, item=item, time_inserted=time
+        )
+        if (
+            temp_assoc := session.get(UserToRecentlyViewed, (user_id, item_id))
+        ) is not None:
+            item_assoc = temp_assoc
+            item_assoc.time_inserted = time
+        else:
+            item_assoc.item = item
+            user.user_recent_viewed_assoc.append(item_assoc)
+        user.user_recent_viewed_assoc = sorted(
+            user.user_recent_viewed_assoc,
+            key=lambda assoc: assoc.time_inserted,
+            reverse=True,
+        )[: user.recent_max_len]
+        session.commit()
+        return None
+
+
+def append_to_recently_searched(user_id: int, item_id: int) -> Optional[str]:
+    with orm.Session(engine) as session:
+        user: Optional[User] = session.get(User, user_id)
+        if user is None:
+            return "user_id not valid"
+        item: Optional[Item] = session.get(Item, item_id)
+        if item is None:
+            return "item_id not valid"
+        time: int = int(
+            datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).timestamp()
+            * 1000000
+        )
+        item_assoc: UserToRecentlySearched = UserToRecentlySearched(
+            user=user, item=item, time_inserted=time
+        )
+        if (
+            temp_assoc := session.get(UserToRecentlySearched, (user_id, item_id))
+        ) is not None:
+            item_assoc = temp_assoc
+            item_assoc.time_inserted = time
+        else:
+            item_assoc.item = item
+            user.user_recent_search_assoc.append(item_assoc)
+        user.user_recent_search_assoc = sorted(
+            user.user_recent_search_assoc,
+            key=lambda assoc: assoc.time_inserted,
+            reverse=True,
+        )[: user.recent_max_len]
+        session.commit()
+        return None
+
+
 def setup_db() -> None:
     Base.metadata.create_all(engine)
 
@@ -132,7 +296,10 @@ def get_item(
 
 
 def get_item_by_source(
-    source_name: str, source_id: str, user_id: Optional[int] = None
+    source_name: str,
+    source_id: str,
+    user_id: Optional[int] = None,
+    add_to_recent_search: bool = False,
 ) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
     with orm.Session(engine) as session:
         item: Sequence[Item] = session.scalars(
@@ -149,6 +316,8 @@ def get_item_by_source(
                 user: Optional[User] = session.get(User, user_id)
                 if user is not None:
                     is_saved = user in item[0].saved_by
+                    if add_to_recent_search:
+                        append_to_recently_searched(user_id, item[0].id)
             session.commit()
             return item[0].to_dict(is_saved)
         else:
@@ -161,6 +330,7 @@ def get_item_by_source(
 def create_item(
     item_data: dict[str, str | bool | int | dict[str, str]],
     user_id: Optional[int] = None,
+    add_to_recent_search: bool = False,
 ) -> dict[str, str | bool | int | dict[str, str]]:
     with orm.Session(engine) as session:
         item: Item = Item(**item_data)
@@ -171,6 +341,8 @@ def create_item(
             user: Optional[User] = session.get(User, user_id)
             if user is not None:
                 is_saved = user in item.saved_by
+                if add_to_recent_search:
+                    append_to_recently_searched(user_id, item.id)
         return item.to_dict(is_saved)
 
 

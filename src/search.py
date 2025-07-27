@@ -22,7 +22,7 @@ def gbooks(
         + ("&download=" + filters["download"] if filters["download"] != "none" else "")
         + f"&filter={filters['available']}&printType={filters['print']}"
     )
-    headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib)"}
+    headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib) (gzip)"}
     volumes: list[
         dict[
             str,
@@ -32,19 +32,21 @@ def gbooks(
                 str | int | bool | list[str | dict[str, str]] | dict[str, str | bool],
             ],
         ]
-    ] = (requests.get(url, headers=headers, timeout=5.0)).json()["items"]
+    ] = (requests.get(url, headers=headers, timeout=10.0)).json()["items"]
+    volumes.reverse()
     for volume in volumes:
         vol_id: str = volume["id"]
         item: Optional[dict[str, str | bool | int | dict[str, str]]] = (
-            db.get_item_by_source("Google Books", vol_id, user_id)
+            db.get_item_by_source(
+                "Google Books", vol_id, user_id, add_to_recent_search=True
+            )
         )
         if item is None:
             # Haven't stored item metadata yet
             vol_info = volume["volumeInfo"]
-            print(vol_info)
-            description: str = f"By {', '.join(vol_info['authors'])}" + (
-                f". {vol_info['description']}" if "description" in vol_info else ""
-            )
+            description: str = (
+                f"By {', '.join(vol_info['authors'])}" if "authors" in vol_info else ""
+            ) + (f". {vol_info['description']}" if "description" in vol_info else "")
             has_thumb = (
                 "thumbnail" in vol_info["imageLinks"]
                 if "imageLinks" in vol_info
@@ -66,10 +68,13 @@ def gbooks(
                 "source_name": "Google Books",
                 "source_id": vol_id,
             }
-            results.append(db.create_item(volume_data))
+            results.append(
+                db.create_item(volume_data, user_id, add_to_recent_search=True)
+            )
         else:
             # Have got item metadata
             results.append(item)
+    results.reverse()
     return results
 
 
@@ -93,10 +98,13 @@ def wikipedia(
         + f"srsearch={quoted_query}&srlimit={num_results}"
     )
     headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib)"}
-    response = requests.get(url, headers=headers, timeout=5.0)
+    response = requests.get(url, headers=headers, timeout=10.0)
     pages = response.json()["query"]["search"]
     page_ids = []
     items = {}
+    correct_order = [str(page["pageid"]) for page in pages]
+    # Reversals for correct recently searched ordering
+    pages.reverse()
     for page in pages:
         page_id: str = str(page["pageid"])
         item: Optional[dict[str, str | bool | int | dict[str, str]]] = (
@@ -133,33 +141,34 @@ def wikipedia(
         page_id = str(page["pageid"])
         if page_id in page_ids:
             has_thumb = "thumbnail" in thumb_json[page_id].keys()
-            try:
-                # Smaller than the minimum
-                thumb_height = -1
-                thumb_mime = ""
-                if has_thumb:
-                    thumb_url = thumb_json[page_id]["thumbnail"]["source"]
-                    thumb_mime = (
-                        requests.head(thumb_url, headers=headers, timeout=5.0)
-                    ).headers["content-type"]
-                    thumb_height = thumb_json[page_id]["thumbnail"]["height"]
-                # Clamps to 0-135px max img height. If no img, should be 0
-                thumb_height = max(0, min(135, thumb_height))
-                wiki_result = {
-                    "title": page["title"],
-                    "description": extract_json[page_id]["extract"],
-                    "thumb_url": thumb_url if has_thumb else "",
-                    "thumb_mime": (thumb_mime if has_thumb else ""),
-                    "thumb_height": thumb_height,
-                    "source_url": info_json[page_id]["fullurl"],
-                    "source_name": "Wikipedia",
-                    "source_id": page_id,
-                }
-                wiki_result = db.create_item(wiki_result)
-                results.append(wiki_result)
-            except KeyError as e:
-                print(e)
-                print(thumb_json[page_id])
+            # Smaller than the minimum
+            thumb_height = -1
+            thumb_mime = ""
+            if has_thumb:
+                thumb_url = thumb_json[page_id]["thumbnail"]["source"]
+                thumb_mime = (
+                    requests.head(thumb_url, headers=headers, timeout=5.0)
+                ).headers["content-type"]
+                thumb_height = thumb_json[page_id]["thumbnail"]["height"]
+            # Clamps to 0-135px max img height. If no img, should be 0
+            thumb_height = max(0, min(135, thumb_height))
+            wiki_result = {
+                "title": page["title"],
+                "description": extract_json[page_id]["extract"],
+                "thumb_url": thumb_url if has_thumb else "",
+                "thumb_mime": (thumb_mime if has_thumb else ""),
+                "thumb_height": thumb_height,
+                "source_url": info_json[page_id]["fullurl"],
+                "source_name": "Wikipedia",
+                "source_id": page_id,
+            }
+            results.append(
+                db.create_item(wiki_result, user_id, add_to_recent_search=True)
+            )
         else:
             results.append(items[page_id])
-    return results
+            # So cached results arent behind new results in recent search list
+            db.get_item_by_source(
+                "Wikipedia", page_id, user_id, add_to_recent_search=True
+            )
+    return sorted(results, key=lambda item: correct_order.index(item["source_id"]))

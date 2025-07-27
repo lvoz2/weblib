@@ -73,6 +73,16 @@ function clickCard(e) {
         el = el.parentElement;
     }
     if (el.classList.contains("card")) {
+        console.log(el);
+        fetch("/api/recent/viewed", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                item_id: el.dataset.id
+            })
+        });
         window.open(el.dataset.href, "_blank");
     }
 }

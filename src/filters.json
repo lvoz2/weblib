@@ -45,7 +45,10 @@
             "type": "radio",
             "options": [
                 {"id": "partial", "name": "Partial Text"},
-                {"id": "full", "name": "Full Text"}
+                {"id": "free-ebooks", "name": "As Free Ebook"},
+                {"id": "ebooks", "name": "As Ebook"},
+                {"id": "full", "name": "Full Text"},
+                {"id": "paid-ebooks", "name": "As Paid Ebook"}
             ],
             "shown_source": "gbooks"
         },

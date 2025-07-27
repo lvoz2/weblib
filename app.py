@@ -14,6 +14,7 @@ app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
 
 # Flask-Session setup
 flask_sql_db = flask_sqlalchemy.SQLAlchemy(model_class=db.Base)
+db.setup_db()
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///server.db"
 flask_sql_db.init_app(app)
 app.config["SESSION_TYPE"] = "sqlalchemy"
@@ -34,7 +35,8 @@ def index() -> str:
     return flask.render_template(
         "index.html",
         saved_items=saved_items,
-        recent_items=[db.get_item(1, user_id)],
+        recent_items=db.get_recently_viewed(user_id),
+        recent_search_items=db.get_recently_searched(user_id),
         logged_in=logged_in,
     )
 
@@ -200,7 +202,29 @@ def unsave_item() -> dict[str, bool | str]:
             return {"status": True}
         return {"status": False, "error": msg}
     except Exception as e:
-        print(e)
+        return {"status": False, "error": str(e)}
+
+
+@app.post("/api/recent/viewed")
+def add_to_recent_viewed() -> dict[str, bool | str]:
+    try:
+        data: Optional[dict[str, str]] = flask.request.json
+        if data is None:
+            return {"status": False, "error": "No data provided"}
+        item_id: Optional[int] = int(data["item_id"]) if "item_id" in data else None
+        user_id: Optional[int] = flask.session.get("user_id", None)
+        if user_id is None:
+            return {"status": False, "error": "Login to remember recent items"}
+        if item_id is None:
+            return {
+                "status": False,
+                "error": "Provide an item_id to remember recent items",
+            }
+        msg = db.append_to_recently_viewed(user_id, item_id)
+        if msg is None:
+            return {"status": True}
+        return {"status": False, "error": msg}
+    except Exception as e:
         return {"status": False, "error": str(e)}
 
 

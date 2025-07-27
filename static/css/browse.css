@@ -102,6 +102,18 @@ main {
     column-rule: 1px solid var(--text-colour);
 }
 
+.filter-option:has(input[type="radio"]) {
+    display: flex;
+}
+
+.filter-option input[type="radio"] {
+    margin-top: 0;
+}
+
+.filter-option:has(input[type="radio"]) label {
+    padding-left: 0.25rem;
+}
+
 .filter-option input[type="range"] {
     height: 1.5rem;
     width: calc(100% - 1.5rem);

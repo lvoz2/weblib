@@ -16,6 +16,11 @@
 <link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
 {% endfor %}
 {% endif %}
+{% if recent_search_items %}
+{% for item in recent_search_items %}
+<link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
+{% endfor %}
+{% endif %}
 {% endblock %}
 {% block critical_files %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" crossorigin="anonymous">
@@ -38,13 +43,27 @@
     <div class="item-list"></div>
     {% endif %}
 </div>
-<div id="recent">
-    <a class="link-container" href="/recent">
-        <span class="link">Recently Viewed <span class="arrow">&#8594</span></span>
+<div id="recentView">
+    <a class="link-container">
+        <span class="link">Recently Viewed</span>
     </a>
     {% if recent_items %}
     <div class="item-list">
     {% for item in recent_items %}
+    {{ macros.card(item) }}
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="help"></div>
+    {% endif %}
+</div>
+<div id="recentSearch">
+    <a class="link-container">
+        <span class="link">Recently Searched</span>
+    </a>
+    {% if recent_search_items %}
+    <div class="item-list">
+    {% for item in recent_search_items %}
     {{ macros.card(item) }}
     {% endfor %}
     </div>
