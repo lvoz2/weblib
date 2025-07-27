@@ -20,7 +20,7 @@
     <div id="filterPane">
         <h2>Search Filters</h2>
         {% for filter in filters %}
-        <div class="filter-section">
+        <div class="filter-section{% if filter.shown_source is not none %} hidden{% endif %}"{% if filter.shown_source is not none %} data-shown-source="{{ filter.shown_source }}"{% endif %}>
             <h3>{{ filter.title }}</h3>
             <div class="filter-not-title">
                 <form class="filter-options" name="{{ filter.name }}" data-type="{{ filter.type }}">

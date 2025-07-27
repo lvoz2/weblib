@@ -2,9 +2,24 @@
 
 import { wrapCards, createCard } from "./card.js";
 
+function showFilters() {
+    const el = document.querySelectorAll(".filter-options[name=source]")[0];
+    const val = el.elements.namedItem("source").value;
+    document.querySelectorAll(".filter-section").forEach((e) => {
+        const desiredSource = e.dataset.shownSource;
+        if (desiredSource == undefined || desiredSource === val) {
+            e.classList.remove("hidden");
+        } else {
+            e.classList.add("hidden");
+        }
+    });
+}
+
 function init() {
     document.getElementById("searchBtn").addEventListener("click", search);
     document.getElementById("resultsSlider").addEventListener("input", resultsSlider);
+    document.querySelectorAll(".filter-options[name=source]")[0].addEventListener("input", showFilters);
+    showFilters();
 }
 
 
@@ -15,7 +30,7 @@ async function search(e) {
     for (let filterE of filterEs) {
         switch (filterE.dataset.type) {
             case "radio":
-                filterData[filterE.name] = filterE.elements.namedItem("source").value;
+                filterData[filterE.name] = filterE.elements.namedItem(filterE.name).value;
                 break;
         }
     }

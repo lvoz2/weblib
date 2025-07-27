@@ -122,3 +122,7 @@ main {
     position: relative;
     display: inline-block;
 }
+
+.hidden {
+    display: none;
+}

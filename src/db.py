@@ -31,7 +31,7 @@ class Item(Base):
     thumb_height: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
     source_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
     source_name: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(64))
-    source_id: orm.Mapped[int] = orm.mapped_column()
+    source_id: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(16))
     saved_by: orm.Mapped[list["User"]] = orm.relationship(
         secondary=users_to_saved, back_populates="saved_items"
     )
@@ -49,6 +49,7 @@ class Item(Base):
             "saved": is_saved,
             "source_url": self.source_url,
             "source_name": self.source_name,
+            "source_id": self.source_id,
         }
 
     def __repr__(self) -> str:
@@ -131,7 +132,7 @@ def get_item(
 
 
 def get_item_by_source(
-    source_name: str, source_id: int, user_id: Optional[int] = None
+    source_name: str, source_id: str, user_id: Optional[int] = None
 ) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
     with orm.Session(engine) as session:
         item: Sequence[Item] = session.scalars(

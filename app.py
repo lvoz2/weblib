@@ -1,8 +1,8 @@
 """Entry Point of the website"""
 
+import json
 import pathlib
 from typing import Optional
-from urllib import parse
 
 import flask
 import flask_session
@@ -19,6 +19,9 @@ flask_sql_db.init_app(app)
 app.config["SESSION_TYPE"] = "sqlalchemy"
 app.config["SESSION_SQLALCHEMY"] = flask_sql_db
 flask_session.Session(app)
+
+with open("src/filters.json", "r") as f:
+    filter_control = json.load(f)["filters"]
 
 
 @app.get("/")
@@ -42,31 +45,7 @@ def browse() -> str:
     logged_in: bool = flask.session.get("user_id", None) is not None
     return flask.render_template(
         "browse.html",
-        filters=[
-            {
-                "title": "Source",
-                "id": "sourceRadio",
-                "name": "source",
-                "default": "wikipedia",
-                "type": "radio",
-                "options": [
-                    {"id": "wikipedia", "name": "Wikipedia"},
-                    {"id": "wiktionary", "name": "Wiktionary"},
-                    {"id": "openLib", "name": "Open Library"},
-                    {"id": "gbooks", "name": "Google Books"},
-                ],
-            },
-            {
-                "title": "Number of Results",
-                "id": "resultsSlider",
-                "name": "Number of Results: ",
-                "default": 5,
-                "type": "range",
-                "min": 1,
-                "max": 20,
-                "step": 1,
-            },
-        ],
+        filters=filter_control,
         logged_in=logged_in,
     )
 
@@ -97,17 +76,21 @@ def search() -> (
     data = flask.request.json
     if data is None:
         return {"status": False, "error": "No data provided"}
-    filters = data["filters"]
+    filters: Optional[dict[str, str]] = data["filters"] if "filters" in data else None
+    if filters is None:
+        return {"status": False, "error": "No filters provided"}
     num_results: int = data["num_results"]
-    query: str = parse.quote(data["query"])
-    if query == "":
-        return {"status": False, "error": "Query must not be empty"}
+    query: str = data["query"]
     results = []
+    if query == "":
+        return {"status": True, "results": results}
     match filters["source"]:
         case "wikipedia":
-            results = search_funcs.wikipedia(query, num_results, user_id=user_id)
+            results = search_funcs.wikipedia(
+                query, num_results, filters, user_id=user_id
+            )
         case "gbooks":
-            pass
+            results = search_funcs.gbooks(query, num_results, filters, user_id=user_id)
         case "openLib":
             pass
         case _:
