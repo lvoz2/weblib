@@ -13,12 +13,24 @@ class Base(orm.DeclarativeBase):
     pass
 
 
-users_to_saved = sqlalchemy.Table(
-    "users_to_saved",
-    Base.metadata,
-    sqlalchemy.Column("user_id", sqlalchemy.ForeignKey("users.id"), primary_key=True),
-    sqlalchemy.Column("item_id", sqlalchemy.ForeignKey("items.id"), primary_key=True),
-)
+class UserToSaved(Base):
+    __tablename__ = "users_to_saved"
+
+    user_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("users.id"), primary_key=True
+    )
+    item_id: orm.Mapped[int] = orm.mapped_column(
+        sqlalchemy.ForeignKey("items.id"), primary_key=True
+    )
+    saved_by: orm.Mapped["User"] = orm.relationship(back_populates="user_saved_assoc")
+    saved_item: orm.Mapped["Item"] = orm.relationship(back_populates="saved_user_assoc")
+    time_inserted: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
+
+    def __repr__(self) -> str:
+        return (
+            f"UserToRecentlyViewed(user_id={self.user_id}, item_id={self.item_id},"
+            + f" time_inserted={self.time_inserted})"
+        )
 
 
 class UserToRecentlyViewed(Base):
@@ -77,8 +89,13 @@ class Item(Base):
     source_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
     source_name: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(64))
     source_id: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(16))
-    saved_by: orm.Mapped[list["User"]] = orm.relationship(
-        secondary=users_to_saved, back_populates="saved_items"
+    saved_by: associationproxy.AssociationProxy[list["User"]] = (
+        associationproxy.association_proxy("saved_user_assoc", "saved_by")
+    )
+
+    saved_user_assoc: orm.Mapped[list[UserToSaved]] = orm.relationship(
+        back_populates="saved_item",
+        cascade="all, delete-orphan",
     )
 
     def to_dict(
@@ -117,8 +134,8 @@ class User(Base):
     platform_id: orm.Mapped[dict[str, Any]] = orm.mapped_column(
         mutable.MutableDict.as_mutable(sqlalchemy.JSON)
     )
-    saved_items: orm.Mapped[list[Item]] = orm.relationship(
-        secondary=users_to_saved, back_populates="saved_by"
+    saved_items: associationproxy.AssociationProxy[list[Item]] = (
+        associationproxy.association_proxy("user_saved_assoc", "saved_item")
     )
     recently_viewed: associationproxy.AssociationProxy[list[Item]] = (
         associationproxy.association_proxy(
@@ -133,6 +150,9 @@ class User(Base):
         )
     )
 
+    user_saved_assoc: orm.Mapped[list[UserToSaved]] = orm.relationship(
+        back_populates="saved_by", cascade="all, delete-orphan"
+    )
     user_recent_search_assoc: orm.Mapped[list[UserToRecentlySearched]] = (
         orm.relationship(
             back_populates="user",
@@ -390,7 +410,12 @@ def get_saved_items(
         if user is not None:
             if len(user.saved_items) == 0:
                 return None
-            return [item.to_dict(True) for item in user.saved_items]
+            saved = sorted(
+                user.user_saved_assoc,
+                key=lambda assoc: assoc.time_inserted,
+                reverse=True,
+            )
+            return [assoc.saved_item.to_dict(True) for assoc in saved]
         raise ValueError(f"No user with id {user_id} found")
 
 
@@ -402,7 +427,21 @@ def save_item(item_id: int, user_id: int) -> Optional[str]:
             return f'User with id "{user_id}" does not exist'
         if item is None:
             return f'Item with id "{item_id}" does not exist'
-        user.saved_items.append(item)
+        time: int = int(
+            datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).timestamp()
+            * 1000000
+        )
+        item_assoc: UserToSaved = UserToSaved(
+            saved_by=user, saved_item=item, time_inserted=time
+        )
+        if (
+            temp_assoc := session.get(UserToSaved, (user_id, item_id))
+        ) is not None:
+            item_assoc = temp_assoc
+            item_assoc.time_inserted = time
+        else:
+            item_assoc.saved_item = item
+            user.user_saved_assoc.append(item_assoc)
         session.commit()
         return None
 
