@@ -98,9 +98,7 @@ class Item(Base):
         cascade="all, delete-orphan",
     )
 
-    def to_dict(
-        self, is_saved: bool = False
-    ) -> dict[str, str | bool | int | dict[str, str]]:
+    def to_dict(self, is_saved: bool = False) -> dict[str, str | bool | int]:
         return {
             "id": str(self.id),
             "title": self.title,
@@ -168,7 +166,7 @@ class User(Base):
 
     def to_dict(self, include_saved: bool = False) -> dict[
         str,
-        int | str | dict[str, Any] | list[dict[str, str | bool | int | dict[str, str]]],
+        int | str | dict[str, str] | list[dict[str, str | bool | int]],
     ]:
         if include_saved:
             return {
@@ -201,7 +199,7 @@ class User(Base):
 
 def get_recently_viewed(
     user_id: Optional[int],
-) -> list[dict[str, str | bool | int | dict[str, str]]]:
+) -> list[dict[str, str | bool | int]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
@@ -216,7 +214,7 @@ def get_recently_viewed(
 
 def get_recently_searched(
     user_id: Optional[int],
-) -> list[dict[str, str | bool | int | dict[str, str]]]:
+) -> list[dict[str, str | bool | int]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
@@ -299,7 +297,7 @@ def setup_db() -> None:
 
 def get_item(
     item_id: int, user_id: Optional[int] = None
-) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
+) -> Optional[dict[str, str | bool | int]]:
     with orm.Session(engine) as session:
         item: Optional[Item] = session.get(Item, item_id)
         if item is not None:
@@ -320,7 +318,7 @@ def get_item_by_source(
     source_id: str,
     user_id: Optional[int] = None,
     add_to_recent_search: bool = False,
-) -> Optional[dict[str, str | bool | int | dict[str, str]]]:
+) -> Optional[dict[str, str | bool | int]]:
     with orm.Session(engine) as session:
         item: Sequence[Item] = session.scalars(
             sqlalchemy.select(Item)
@@ -348,10 +346,10 @@ def get_item_by_source(
 
 
 def create_item(
-    item_data: dict[str, str | bool | int | dict[str, str]],
+    item_data: dict[str, str | int],
     user_id: Optional[int] = None,
     add_to_recent_search: bool = False,
-) -> dict[str, str | bool | int | dict[str, str]]:
+) -> dict[str, str | bool | int]:
     with orm.Session(engine) as session:
         item: Item = Item(**item_data)
         session.add(item)
@@ -375,7 +373,7 @@ def get_or_create_user(
     username: Optional[str] = None,
 ) -> dict[
     str,
-    int | str | dict[str, Any] | list[dict[str, str | bool | int | dict[str, str]]],
+    int | str | dict[str, str] | list[dict[str, str | bool | int]],
 ]:
     with orm.Session(engine) as session:
         user: Sequence[User] = session.scalars(
@@ -404,7 +402,7 @@ def get_or_create_user(
 
 def get_saved_items(
     user_id: int,
-) -> Optional[list[dict[str, str | bool | int | dict[str, str]]]]:
+) -> Optional[list[dict[str, str | bool | int]]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is not None:
@@ -434,9 +432,7 @@ def save_item(item_id: int, user_id: int) -> Optional[str]:
         item_assoc: UserToSaved = UserToSaved(
             saved_by=user, saved_item=item, time_inserted=time
         )
-        if (
-            temp_assoc := session.get(UserToSaved, (user_id, item_id))
-        ) is not None:
+        if (temp_assoc := session.get(UserToSaved, (user_id, item_id))) is not None:
             item_assoc = temp_assoc
             item_assoc.time_inserted = time
         else:

@@ -71,9 +71,7 @@ def saved() -> str:
 
 
 @app.post("/api/browse/search")
-def search() -> (
-    dict[str, bool | str | list[dict[str, str | bool | int | dict[str, str]]]]
-):
+def search() -> dict[str, bool | str | list[dict[str, str | bool | int]]]:
     user_id: Optional[int] = flask.session.get("user_id", None)
     data = flask.request.json
     if data is None:
@@ -83,14 +81,12 @@ def search() -> (
         return {"status": False, "error": "No filters provided"}
     num_results: int = data["num_results"]
     query: str = data["query"]
-    results = []
+    results: list[dict[str, str | bool | int]] = []
     if query == "":
         return {"status": True, "results": results}
     match filters["source"]:
         case "wikipedia":
-            results = search_funcs.wikipedia(
-                query, num_results, filters, user_id=user_id
-            )
+            results = search_funcs.wikipedia(query, num_results, user_id=user_id)
         case "gbooks":
             results = search_funcs.gbooks(query, num_results, filters, user_id=user_id)
         case "openLib":
@@ -106,9 +102,7 @@ def redirect() -> str:
 
 
 @app.post("/api/users/login")
-def send() -> (
-    dict[str, bool | str | Optional[list[dict[str, str | bool | int | dict[str, str]]]]]
-):
+def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int]]]]:
     try:
         data: Optional[dict[str, str | dict[str, str]]] = flask.request.json
         if data is None:
@@ -140,12 +134,17 @@ def send() -> (
             raise TypeError("User id somehow not an int")
         flask.session["user_id"] = user["id"]
         try:
-            saved_items: Optional[
-                list[dict[str, str | bool | int | dict[str, str]]]
-            ] = db.get_saved_items(user["id"])
+            saved_items: Optional[list[dict[str, str | bool | int]]] = (
+                db.get_saved_items(user["id"])
+            )
         except ValueError:
             return {"status": False, "error": "Failed to properly login"}
-        return {"status": True, "saved": saved_items, "recently_viewed": db.get_recently_viewed(user["id"]), "recently_searched": db.get_recently_searched(user["id"])}
+        return {
+            "status": True,
+            "saved": saved_items,
+            "recently_viewed": db.get_recently_viewed(user["id"]),
+            "recently_searched": db.get_recently_searched(user["id"]),
+        }
     except Exception as e:
         # Something bad happened
         print(e)
