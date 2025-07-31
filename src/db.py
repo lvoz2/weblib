@@ -351,17 +351,35 @@ def create_item(
     add_to_recent_search: bool = False,
 ) -> dict[str, str | bool | int]:
     with orm.Session(engine) as session:
-        item: Item = Item(**item_data)
-        session.add(item)
-        session.commit()
-        is_saved = False
-        if user_id is not None:
-            user: Optional[User] = session.get(User, user_id)
-            if user is not None:
-                is_saved = user in item.saved_by
-                if add_to_recent_search:
-                    append_to_recently_searched(user_id, item.id)
-        return item.to_dict(is_saved)
+        source_name = str(item_data["source_name"])
+        source_id = str(item_data["source_id"])
+        items: Sequence[Item] = session.scalars(
+            sqlalchemy.select(Item)
+            .where(Item.source_name == source_name)
+            .where(Item.source_id == source_id)
+        ).all()
+        if len(items) == 0:
+            item: Item = Item(**item_data)
+            session.add(item)
+            session.commit()
+            is_saved = False
+            if user_id is not None:
+                user: Optional[User] = session.get(User, user_id)
+                if user is not None:
+                    is_saved = user in item.saved_by
+                    if add_to_recent_search:
+                        append_to_recently_searched(user_id, item.id)
+            return item.to_dict(is_saved)
+        else:
+            item = items[0]
+            is_saved = False
+            if user_id is not None:
+                user: Optional[User] = session.get(User, user_id)
+                if user is not None:
+                    is_saved = user in item.saved_by
+                    if add_to_recent_search:
+                        append_to_recently_searched(user_id, item.id)
+            return item.to_dict(is_saved)
 
 
 def get_or_create_user(

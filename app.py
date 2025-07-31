@@ -79,7 +79,7 @@ def search() -> dict[str, bool | str | list[dict[str, str | bool | int]]]:
     filters: Optional[dict[str, str]] = data["filters"] if "filters" in data else None
     if filters is None:
         return {"status": False, "error": "No filters provided"}
-    num_results: int = data["num_results"]
+    num_results: int = min(data["num_results"], 20)
     query: str = data["query"]
     results: list[dict[str, str | bool | int]] = []
     if query == "":
