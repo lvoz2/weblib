@@ -98,6 +98,9 @@ async function onMessage(e) {
                     }
                 }
                 wrapCards()
+            } else {
+                alert("An issue happened while sending login information to server. Please notify site owner, sending them this error message: " + json.error);
+                return;
             }
         } else {
             throw new Error("JWT Bad. Content: " + JSON.stringify(body))

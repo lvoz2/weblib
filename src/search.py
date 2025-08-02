@@ -24,6 +24,27 @@ def gbooks(
     )
     print(url)
     headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib) (gzip)"}
+    res: dict[
+        str,
+        str
+        | int
+        | list[
+            dict[
+                str,
+                str
+                | dict[
+                    str,
+                    str
+                    | int
+                    | bool
+                    | list[str]
+                    | list[dict[str, str]]
+                    | dict[str, str]
+                    | dict[str, bool],
+                ],
+            ]
+        ],
+    ] = (requests.get(url, headers=headers, timeout=10.0)).json()
     volumes: list[
         dict[
             str,
@@ -39,7 +60,11 @@ def gbooks(
                 | dict[str, bool],
             ],
         ]
-    ] = (requests.get(url, headers=headers, timeout=10.0)).json()["items"]
+    ] = (
+        (res["items"] if isinstance(res["items"], list) else [])
+        if "items" in res
+        else []
+    )
     volumes.reverse()
     for volume in volumes:
         vol_id: Optional[str] = (
@@ -71,7 +96,13 @@ def gbooks(
                 # Haven't stored item metadata yet
                 description: str = (
                     (
-                        f"By {', '.join([(author if isinstance(author, str) else '') for author in vol_info['authors']])}"
+                        "By "
+                        + ", ".join(
+                            [
+                                (author if isinstance(author, str) else "")
+                                for author in vol_info["authors"]
+                            ]
+                        )
                         if isinstance(vol_info["authors"], list)
                         else ""
                     )

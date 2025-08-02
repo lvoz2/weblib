@@ -52,8 +52,16 @@ async function search(e) {
     }).then(res => res.json()).then(json => {
         return json;
     });
+    if (!json.status) {
+        alert("An issue happened during search. Please notify site owner, sending them this error message: " + json.error);
+        return;
+    }
     if (!Object.hasOwnProperty.call(json, "results")) {
         throw new Error("Results not in API response");
+    }
+    if (json.results.length == 0) {
+        alert("Either no items were found for your search query, or an error occured because of the query. Please change your query and try again")
+        return;
     }
     const resultsE = document.getElementById("resultsInner");
     resultsE.innerHTML = "";

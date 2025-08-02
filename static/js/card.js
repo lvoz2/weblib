@@ -44,7 +44,7 @@ export async function toggleSave(e) {
     }
     if (target.querySelectorAll(".hidden")[0].classList.contains("fa-solid")) {
         // Item is now not saved
-        const msg = await fetch("/api/item/unsave", {
+        const msg = await (await fetch("/api/item/unsave", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -52,7 +52,11 @@ export async function toggleSave(e) {
             body: JSON.stringify({
                 "item_id": itemId
             })
-        });
+        })).json();
+        if (!msg.status) {
+            alert("An issue happened during unsave. Please notify site owner, sending them this error message: " + json.error);
+            return;
+        }
     } else {
         // Item is now saved
         if (location.pathname === "/") {
@@ -60,7 +64,7 @@ export async function toggleSave(e) {
             const savedListE = document.querySelectorAll("#saved .item-list")[0];
             prependCard(card, savedListE)
         }
-        const msg = await fetch("/api/item/save", {
+        const msg = await (await fetch("/api/item/save", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -68,21 +72,29 @@ export async function toggleSave(e) {
             body: JSON.stringify({
                 "item_id": itemId
             })
-        });
+        })).json();
+        if (!msg.status) {
+            alert("An issue happened during save. Please notify site owner, sending them this error message: " + json.error);
+            return;
+        }
     }
 }
 
 function prependCard(card, listE) {
     if (location.pathname === "/") {
+        if (card === listE.children[0]) {
+            // Card already first, do nothing
+            return;
+        }
         // Remove cards with the same id already in the list
         listE.querySelectorAll(".card[data-id='" + card.dataset.id + "']").forEach((cur) => {
             cur.remove();
         });
         const newCard = card.cloneNode(true);
-        card.querySelectorAll(".card").forEach((e) => {
+        newCard.querySelectorAll(".card").forEach((e) => {
             e.addEventListener("click", clickCard);
         });
-        card.querySelectorAll(".save-icons").forEach((e) => {
+        newCard.querySelectorAll(".save-icons").forEach((e) => {
             e.addEventListener("click", toggleSave);
         });
         listE.prepend(newCard);
