@@ -54,7 +54,6 @@
 
 /* Fade transition from https://codepen.io/toaster99/pen/BpgzQR?editors=1100 */
 .save-icons {
-    color: var(--text-colour);
     float: right;
     line-height: 1;
     position: relative;
@@ -63,23 +62,40 @@
 }
 
 .save-icon {
-    transition: color 0.3s, opacity 0.25s;
+    transition: color 0.25s, opacity 0.25s;
 }
 
-.save-icon:not(.hidden) {
+.save-icon-border {
+    color: var(--text-color);
+}
+
+.save-icons:hover .save-icon-border {
+    color: red;
+}
+
+.save-icon-fill.hidden {
+    opacity: 0;
+    color: red;
+}
+
+.save-icon-fill:not(.hidden) {
     opacity: 1;
+    color: red;
+}
+
+.save-icons:hover .save-icon-fill:not(.hidden) {
+    opacity: 1;
+    color: red;
 }
 
 .save-icon-first {
     position: absolute;
+    z-index: 10;
 }
 
-.save-icon.hidden {
-    opacity: 0;
-}
-
-.save-icons:hover, .save-icon.fa-solid.fa-bookmark {
-    color: red;
+.save-icon:not(.save-icon-first) {
+    position: relative;
+    z-index: 9;
 }
 
 .card-source {

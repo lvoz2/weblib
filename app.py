@@ -30,7 +30,7 @@ with open("src/filters.json", "r", encoding="utf-8") as f:
 def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
-    saved_items = None if user_id is None else db.get_saved_items(user_id)
+    saved_items = None if user_id is None else db.get_saved_items(user_id)[:20]
     logged_in: bool = user_id is not None
     return flask.render_template(
         "index.html",

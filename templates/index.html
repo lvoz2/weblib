@@ -3,7 +3,6 @@
 {% block critical_files_preload %}
 <link rel="preload" href="{{ url_for('static', filename='css/index.css') }}" crossorigin="anonymous" as="style">
 <link rel="preload" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" as="style">
-<link rel="preload" href="{{ url_for('static', filename='js/index.js') }}" crossorigin="anonymous" as="script">
 {% endblock %}
 {% block preload_head %}
 {% if saved_items %}
@@ -11,7 +10,7 @@
 <link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
 {% endfor %}
 {% endif %}
-{% if recent_items %}
+{% if recent_items is not none %}
 {% for item in recent_items %}
 <link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
 {% endfor %}
@@ -25,7 +24,6 @@
 {% block critical_files %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" crossorigin="anonymous">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous">
-<script type="module" src="{{ url_for('static', filename='js/index.js') }}" crossorigin="anonymous"></script>
 {% endblock %}
 {% block selected_home %} selected{% endblock %}
 {% block content %}

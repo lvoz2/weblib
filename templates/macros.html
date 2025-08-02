@@ -5,8 +5,8 @@
         <div class="card-inner-top">
             <h3>{{ item.title }}</h3>
             <div class="save-icons">
-                <i class="save-icon {% if not item.saved %}hidden{% endif %} save-icon-first fa-solid fa-bookmark parent-styled"></i>
-                <i class="save-icon {% if item.saved %}hidden{% endif %} fa-regular fa-bookmark parent-styled"></i>
+                <i class="save-icon{% if item.saved %} hidden{% endif %} save-icon-border save-icon-first fa-regular fa-bookmark"></i>
+                <i class="save-icon{% if not item.saved %} hidden{% endif %} save-icon-fill fa-solid fa-bookmark"></i>
             </div>
         </div>
         <div class="card-description">

@@ -199,31 +199,35 @@ class User(Base):
 
 def get_recently_viewed(
     user_id: Optional[int],
-) -> list[dict[str, str | bool | int]]:
+) -> Optional[list[dict[str, str | bool | int]]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
-            return []
+            return None
         data: list[UserToRecentlyViewed] = sorted(
             user.user_recent_viewed_assoc,
             key=lambda assoc: assoc.time_inserted,
             reverse=True,
         )[: user.recent_max_len]
+        if len(data) == 0:
+            return None
         return [assoc.item.to_dict(assoc.item in user.saved_items) for assoc in data]
 
 
 def get_recently_searched(
     user_id: Optional[int],
-) -> list[dict[str, str | bool | int]]:
+) -> Optional[list[dict[str, str | bool | int]]]:
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
-            return []
+            return None
         data: list[UserToRecentlySearched] = sorted(
             user.user_recent_search_assoc,
             key=lambda assoc: assoc.time_inserted,
             reverse=True,
         )[: user.recent_max_len]
+        if len(data) == 0:
+            return None
         return [assoc.item.to_dict(assoc.item in user.saved_items) for assoc in data]
 
 

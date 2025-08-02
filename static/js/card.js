@@ -55,6 +55,11 @@ export async function toggleSave(e) {
         });
     } else {
         // Item is now saved
+        if (location.pathname === "/") {
+            const card = target.parentElement.parentElement.parentElement;
+            const savedListE = document.querySelectorAll("#saved .item-list")[0];
+            prependCard(card, savedListE)
+        }
         const msg = await fetch("/api/item/save", {
             method: "POST",
             headers: {
@@ -67,13 +72,36 @@ export async function toggleSave(e) {
     }
 }
 
+function prependCard(card, listE) {
+    if (location.pathname === "/") {
+        // Remove cards with the same id already in the list
+        listE.querySelectorAll(".card[data-id='" + card.dataset.id + "']").forEach((cur) => {
+            cur.remove();
+        });
+        const newCard = card.cloneNode(true);
+        card.querySelectorAll(".card").forEach((e) => {
+            e.addEventListener("click", clickCard);
+        });
+        card.querySelectorAll(".save-icons").forEach((e) => {
+            e.addEventListener("click", toggleSave);
+        });
+        listE.prepend(newCard);
+        // Can't use listE.childNodes (even though both produce NodeLists) because it will update as I mutate
+        listE.querySelectorAll(".card").forEach((cur, i) => {
+            if (i >= 20) {
+                cur.remove();
+            }
+        });
+    }
+}
+
 function clickCard(e) {
     let el = e.target;
     while(!(el.classList.contains("card") || el.classList.contains("save-icons"))) {
         el = el.parentElement;
     }
     if (el.classList.contains("card")) {
-        console.log(el);
+        prependCard(el, document.querySelectorAll("#recentView .item-list")[0]);
         fetch("/api/recent/viewed", {
             method: "POST",
             headers: {
@@ -94,8 +122,8 @@ export function createCard(item) {
             <div class="card-inner-top">
                 <h3>` + item.title + `</h3>
                 <div class="save-icons">
-                    <i class="save-icon ` + (item.saved ? "" : "hidden") + ` save-icon-first fa-solid fa-bookmark parent-styled"></i>
-                    <i class="save-icon ` + (item.saved ? "hidden" : "") + ` fa-regular fa-bookmark parent-styled"></i>
+                    <i class="save-icon` + (item.saved ? " hidden" : "") + ` save-icon-border save-icon-first fa-regular fa-bookmark"></i>
+                    <i class="save-icon` + (item.saved ? "" : " hidden") + ` save-icon-fill fa-solid fa-bookmark"></i>
                 </div>
             </div>
             <div class="card-description">

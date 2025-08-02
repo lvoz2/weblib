@@ -27,8 +27,8 @@ async function onMessage(e) {
         const sig = jwtParts[2];
         const time = Math.floor(Date.now() / 1000);
         if (
-            returnState === window.auth.state && 
-            body.aud === clientId && 
+            returnState === window.auth.state &&
+            body.aud === clientId &&
             body.nonce === window.auth.nonce &&
             body.iss === "https://login.microsoftonline.com/" + body.tid + "/v2.0" &&
             body.iat >= body.nbf && body.iat < body.exp && time > body.iat &&
@@ -56,7 +56,7 @@ async function onMessage(e) {
                 },
                 "body": JSON.stringify(fetchBody)
             })).json();
-            if (data.status) { 
+            if (data.status) {
                 document.getElementById("login").innerText = "LOGOUT";
                 const saved = data.saved;
                 if (saved != null) {
@@ -134,7 +134,7 @@ function toggleLogin(e) {
         const code = getIdToken(state, nonce);
     } else {
         fetch("/api/users/logout");
-        const url = "https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=" + encodeURIComponent(window.location);
+        const url = "https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=" + encodeURIComponent(location.origin + "/browse");
         window.location = url;
     }
 }
