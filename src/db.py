@@ -83,7 +83,7 @@ class Item(Base):
     id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
     title: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(255))
     description: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
-    thumb_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(10))
+    thumb_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(255))
     thumb_mime: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(255))
     thumb_height: orm.Mapped[int] = orm.mapped_column(sqlalchemy.Integer())
     source_url: orm.Mapped[str] = orm.mapped_column(sqlalchemy.String(1023))
