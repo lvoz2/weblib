@@ -1,3 +1,3 @@
-python -m venv venv
-.\venv\Scripts\activate.bat
-python -m pip install -r requirements.txt
+@echo off
+python.exe -m venv venv
+venv\Scripts\python.exe -m pip install -r requirements.txt
