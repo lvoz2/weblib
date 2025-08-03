@@ -2,6 +2,7 @@
 <html>
     <head>
         <script>
+            const clientId = "21b089d7-aa3e-478f-a992-9aa757adc73f";
             function genData() {
                 let state = Math.floor(Math.random() * 1_000_000).toString();
                 while (state.length < 6) {
@@ -27,13 +28,13 @@
                 if (code === "login_required" || code === "interaction_required") {
                     const { state, nonce } = genData();
                     window.location = ("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
-                    + "client_id=21b089d7-aa3e-478f-a992-9aa757adc73f&response_type=id_token&redirect_uri="
+                    + "client_id=" + clientId + "&response_type=id_token&redirect_uri="
                     + window.location.origin + window.location.pathname + "&response=form_post&scope=openid%20email%20profile&state=" + state
                     + "&prompt=login&nonce=" + nonce);
                 } else if (code === "consent_required") {
                     const { state, nonce } = genData();
                     window.location = ("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
-                    + "client_id=21b089d7-aa3e-478f-a992-9aa757adc73f&response_type=id_token&redirect_uri="
+                    + "client_id=" + clientId + "&response_type=id_token&redirect_uri="
                     + window.location.origin + window.location.pathname + "&response=form_post&scope=openid%20email%20profile&state=" + state
                     + "&prompt=consent&nonce=" + nonce);
                 } else {
