@@ -200,6 +200,8 @@ class User(Base):
 def get_recently_viewed(
     user_id: Optional[int],
 ) -> Optional[list[dict[str, str | bool | int]]]:
+    if user_id is None:
+        return None
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
@@ -217,6 +219,8 @@ def get_recently_viewed(
 def get_recently_searched(
     user_id: Optional[int],
 ) -> Optional[list[dict[str, str | bool | int]]]:
+    if user_id is None:
+        return None
     with orm.Session(engine) as session:
         user: Optional[User] = session.get(User, user_id)
         if user is None:
