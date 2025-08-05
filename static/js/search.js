@@ -47,7 +47,8 @@ async function search(e) {
         body: JSON.stringify({
             "query": query,
             num_results: num_results,
-            filters: filterData
+            filters: filterData,
+            csrf_token: document.querySelectorAll("meta[name='csrf-token']")[0].content,
         })
     }).then(res => res.json()).then(json => {
         return json;

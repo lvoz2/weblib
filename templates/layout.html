@@ -5,31 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
     <meta name="description" content="An online library of books for libraries">
     <meta name="color-scheme" content="dark light" />
+    {% if csrf_token %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    {% endif %}
     <title>WebLib</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
     <!-- Heavy influence from the McMaster-Carr website -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous">
-    <link rel="preload" href="{{ url_for('static', filename='css/main.css') }}" crossorigin="anonymous" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='img/logo.png') }}" crossorigin="anonymous" as="image">
-    <link rel="preload" href="{{ url_for('static', filename='js/auth.js') }}" crossorigin="anonymous" as="script">
-    <link rel="preload" href="{{ url_for('static', filename='js/main.js') }}" crossorigin="anonymous" as="script">
+    <!-- <link rel="preload" href="{{ url_for('static', filename='img/logo.png') }}" crossorigin="anonymous" as="image"> -->
+    <link rel="preload" href="{{ url_for('static', filename='css/main.css') }}" crossorigin="anonymous" as="style" integrity="<integrity_hash>">
+    <link rel="preload" href="{{ url_for('static', filename='js/auth.js') }}" crossorigin="anonymous" as="script" integrity="<integrity_hash>">
+    <link rel="preload" href="{{ url_for('static', filename='js/main.js') }}" crossorigin="anonymous" as="script" integrity="<integrity_hash>">
     {% block critical_files_preload %}{% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" crossorigin="anonymous">
-    <script type="module" src="{{ url_for('static', filename='js/main.js') }}" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" crossorigin="anonymous" integrity="<integrity_hash>">
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}" crossorigin="anonymous" integrity="<integrity_hash>"></script>
     {% block critical_files %}{% endblock %}
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" crossorigin="anonymous" as="style">
-    <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBA.woff2" crossorigin="anonymous" as="font" type="font/woff2">
-    <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMawCUBGEe.woff2" crossorigin="anonymous" as="font" type="font/woff2">
-    <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMaxKUBGEe.woff2" crossorigin="anonymous" as="font" type="font/woff2">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/css/roboto.css') }}" crossorigin="anonymous" as="style" integrity="sha512-eRsf5xjuCNrSfqfvoQ58fwGXzUFddhr2Q8wxS7d6DwTMK0w223pBtr476J3qlzQqPdKjuf7aAecK3U/Gveu74Q==">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/woff2/roboto_latin.woff2') }}" crossorigin="anonymous" as="font" type="font/woff2" integrity="sha512-DmeVJVtu6gC1QD/X47kE1Sd21JrGOjHCd4NhJiiDaXlDrtyyn+7oVpS6bxnqo03duaW/5xGPSiW0dX6SwzH+yg==">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/woff2/roboto_maths.woff2') }}" crossorigin="anonymous" as="font" type="font/woff2" integrity="sha512-ofy+msD5rvfEBoH3gaBoRQlT5czkMHCpaLCQ+cvVkCv5IuS85CLLfOtBwGQfLdPstXjZj0soUqn0Hp4panZ5bg==">
+    <link rel="preload" href="{{ url_for('static', filename='fonts/woff2/roboto_symbols.woff2') }}" crossorigin="anonymous" as="font" type="font/woff2" integrity="sha512-18P4GtEaxbPm9FT7u5vglAs+jak83guA+akaglmWa+RmtNag/VUn/MbI8hiq2P/QEkuynfoI9spljOSf6eN+bA==">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" as="style" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-regular-400.woff2" crossorigin="anonymous" as="font" type="font/woff2">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-solid-900.woff2" crossorigin="anonymous" as="font" type="font/woff2">
-    {% block preload_head %}{% endblock %}
-    <script type="module" src="{{ url_for('static', filename='js/auth.js') }}" async crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-regular-400.woff2" crossorigin="anonymous" as="font" type="font/woff2" integrity="sha512-jEJGqVEYc8KNmAl3VM9lfmiT2NJ0AV226Htbb0yF2bysTSfo16xggW03dawVaOFqFAi91TLok7QDWCrwESFLIw==">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/webfonts/fa-solid-900.woff2" crossorigin="anonymous" as="font" type="font/woff2" integrity="sha512-lsXTKDtxYTtZW2sEIDM7711kRRrwXFnd4n7Fs+fP5ulUnGBM3fvLecvA/UzW8uIqEwyaIgsbfvkzrJ34yOaV1g==">
+    <script type="module" src="{{ url_for('static', filename='js/auth.js') }}" async crossorigin="anonymous" integrity="<integrity_hash>"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/css/roboto.css') }}" crossorigin="anonymous" integrity="sha512-eRsf5xjuCNrSfqfvoQ58fwGXzUFddhr2Q8wxS7d6DwTMK0w223pBtr476J3qlzQqPdKjuf7aAecK3U/Gveu74Q==">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==">
 </head>
 <body>
     <main>

@@ -50,11 +50,12 @@ export async function toggleSave(e) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "item_id": itemId
+                "item_id": itemId,
+                csrf_token: document.querySelectorAll("meta[name='csrf-token']")[0].content,
             })
         })).json();
         if (!msg.status) {
-            alert("An issue happened during unsave. Please notify site owner, sending them this error message: " + json.error);
+            alert("An issue happened during unsave. Please notify site owner, sending them this error message: " + msg.error);
             return;
         }
     } else {
@@ -70,11 +71,12 @@ export async function toggleSave(e) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "item_id": itemId
+                "item_id": itemId,
+                csrf_token: document.querySelectorAll("meta[name='csrf-token']")[0].content,
             })
         })).json();
         if (!msg.status) {
-            alert("An issue happened during save. Please notify site owner, sending them this error message: " + json.error);
+            alert("An issue happened during save. Please notify site owner, sending them this error message: " + msg.error);
             return;
         }
     }
@@ -120,7 +122,8 @@ function clickCard(e) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                item_id: el.dataset.id
+                item_id: el.dataset.id,
+                csrf_token: document.querySelectorAll("meta[name='csrf-token']")[0].content,
             })
         });
         window.open(el.dataset.href, "_blank");

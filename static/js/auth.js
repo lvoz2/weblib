@@ -42,6 +42,7 @@ async function onMessage(e) {
                     tid: body.tid
                 },
                 email: body.email,
+                csrf_token: document.querySelectorAll("meta[name='csrf-token']")[0].content,
             };
             if (Object.hasOwnProperty.call(body, "preferred_username")) {
                 fetchBody.username = body.preferred_username;
@@ -57,6 +58,7 @@ async function onMessage(e) {
                 "body": JSON.stringify(fetchBody)
             })).json();
             if (data.status) {
+                document.querySelectorAll("meta[name='csrf-token']")[0].content = data.new_token;
                 document.getElementById("login").innerText = "LOGOUT";
                 const saved = data.saved;
                 if (saved != null) {

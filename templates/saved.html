@@ -1,19 +1,12 @@
 {% import "macros.html" as macros %}
 {% extends 'layout.html' %}
 {% block critical_files_preload %}
-<link rel="preload" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" as="style">
-<link rel="preload" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous" as="style">
-{% endblock %}
-{% block preload_head %}
-{% if saved_items %}
-{% for item in saved_items %}
-<link rel="preload" href="{{ item.thumb_url }}" as="image" type="{{item.thumb_mime}}">
-{% endfor %}
-{% endif %}
+<link rel="preload" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" as="style" integrity="<integrity_hash>">
+<link rel="preload" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous" as="style" integrity="<integrity_hash>">
 {% endblock %}
 {% block critical_files %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" crossorigin="anonymous" integrity="<integrity_hash>">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/saved.css') }}" crossorigin="anonymous" integrity="<integrity_hash>">
 {% endblock %}
 {% block selected_saved %} selected{% endblock %}
 {% block content %}
@@ -24,7 +17,7 @@
 {% endif %}
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
     if (!window.app) {
         window.app = {};
     }

@@ -1,23 +1,63 @@
 """Entry Point of the website"""
 
 import json
+import os
 import pathlib
 from typing import Optional
 
+import dotenv
 import flask
+import flask_talisman
 import flask_session
 import flask_sqlalchemy
 from src import db
 from src import search as search_funcs
+from src.sec_helpers import get_csrf_token, use_csrf, use_sri
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+dotenv.load_dotenv()
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
 
+# flask-talisman setup
+csp = {
+    "default-src": "'none'",
+    "script-src": "'self'",
+    "style-src": "'self' https://cdnjs.cloudflare.com/",
+    "img-src": "'self' https://books.google.com/ https://upload.wikimedia.org/",
+    "font-src": "'self' https://cdnjs.cloudflare.com/ https://fonts.gstatic.com/",
+    "connect-src": "'self'",
+    "frame-ancestors": "'none'",
+    "form-action": "'self'",
+    "base-uri": "'self'",
+    "upgrade-insecure-requests": "",
+}
+flask_talisman.Talisman(
+    app,
+    force_https=False,
+    frame_options="DENY",
+    strict_transport_security_preload=True,
+    content_security_policy=csp,
+    content_security_policy_nonce_in=["script-src"],
+    session_cookie_samesite="Lax",
+)
+
+
+# Extra headers
+def add_headers(res: flask.Response) -> flask.Response:
+    res.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+    res.headers["Access-Control-Allow-Origin"] = os.environ["DOMAIN"]
+    return res
+
+
+app.after_request(add_headers)
+
 # Flask-Session setup
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///server.db"
+app.config["SESSION_TYPE"] = "sqlalchemy"
+app.config["SESSION_COOKIE_SECURE"] = True
 flask_sql_db = flask_sqlalchemy.SQLAlchemy(model_class=db.Base)
 db.setup_db()
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///server.db"
 flask_sql_db.init_app(app)
-app.config["SESSION_TYPE"] = "sqlalchemy"
 app.config["SESSION_SQLALCHEMY"] = flask_sql_db
 flask_session.Session(app)
 
@@ -27,15 +67,19 @@ with open("src/filters.json", "r", encoding="utf-8") as f:
 
 @app.get("/")
 @app.get("/index.html")
+@use_sri(app)
 def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
-    saved_items: Optional[list[dict[str, str | bool | int]]] = None if user_id is None else db.get_saved_items(user_id)
+    saved_items: Optional[list[dict[str, str | bool | int]]] = (
+        None if user_id is None else db.get_saved_items(user_id)
+    )
     if saved_items is not None:
         saved_items = saved_items[:20]
     logged_in: bool = user_id is not None
     return flask.render_template(
         "index.html",
+        csrf_token=get_csrf_token(flask.session),
         saved_items=saved_items,
         recent_items=db.get_recently_viewed(user_id),
         recent_search_items=db.get_recently_searched(user_id),
@@ -44,35 +88,45 @@ def index() -> str:
 
 
 @app.get("/browse")
+@use_sri(app)
 def browse() -> str:
     """browse page for site"""
     logged_in: bool = flask.session.get("user_id", None) is not None
     return flask.render_template(
         "browse.html",
+        csrf_token=get_csrf_token(flask.session),
         filters=filter_control,
         logged_in=logged_in,
     )
 
 
 @app.get("/query")
+@use_sri(app)
 def query_page() -> str:
     """ask question page for site"""
     logged_in: bool = flask.session.get("user_id", None) is not None
-    return flask.render_template("query.html", logged_in=logged_in)
+    return flask.render_template(
+        "query.html", csrf_token=get_csrf_token(flask.session), logged_in=logged_in
+    )
 
 
 @app.get("/saved")
+@use_sri(app)
 def saved() -> str:
     """saved items page for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
     logged_in: bool = user_id is not None
     saved_items = None if user_id is None else db.get_saved_items(user_id)
     return flask.render_template(
-        "saved.html", saved_items=saved_items, logged_in=logged_in
+        "saved.html",
+        csrf_token=get_csrf_token(flask.session),
+        saved_items=saved_items,
+        logged_in=logged_in,
     )
 
 
 @app.post("/api/browse/search")
+@use_csrf(flask.session, flask.request)
 def search() -> dict[str, bool | str | list[dict[str, str | bool | int]]]:
     user_id: Optional[int] = flask.session.get("user_id", None)
     data = flask.request.json
@@ -104,6 +158,7 @@ def redirect() -> str:
 
 
 @app.post("/api/users/login")
+@use_csrf(flask.session, flask.request)
 def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int]]]]:
     try:
         data: Optional[dict[str, str | dict[str, str]]] = flask.request.json
@@ -146,6 +201,7 @@ def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int]]]
             "saved": saved_items,
             "recently_viewed": db.get_recently_viewed(user["id"]),
             "recently_searched": db.get_recently_searched(user["id"]),
+            "new_token": get_csrf_token(flask.session),
         }
     except Exception as e:
         # Something bad happened
@@ -166,6 +222,7 @@ def logout() -> dict[str, bool | str]:
 
 
 @app.post("/api/item/save")
+@use_csrf(flask.session, flask.request)
 def save_item() -> dict[str, bool | str]:
     try:
         data = flask.request.json
@@ -187,6 +244,7 @@ def save_item() -> dict[str, bool | str]:
 
 
 @app.post("/api/item/unsave")
+@use_csrf(flask.session, flask.request)
 def unsave_item() -> dict[str, bool | str]:
     try:
         data = flask.request.json
@@ -207,6 +265,7 @@ def unsave_item() -> dict[str, bool | str]:
 
 
 @app.post("/api/recent/viewed")
+@use_csrf(flask.session, flask.request)
 def add_to_recent_viewed() -> dict[str, bool | str]:
     try:
         data: Optional[dict[str, str]] = flask.request.json
@@ -230,4 +289,5 @@ def add_to_recent_viewed() -> dict[str, bool | str]:
 
 
 if __name__ == "__main__":
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     app.run(debug=True, port=8010)

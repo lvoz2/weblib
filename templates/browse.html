@@ -1,11 +1,11 @@
 {% extends 'layout.html' %}
 {% block critical_files_preload %}
-<link rel="preload" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous" as="style">
+<link rel="preload" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous" as="style" integrity="<integrity_hash>">
 {% endblock %}
 {% block critical_files %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous">
-<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer crossorigin="anonymous"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low" crossorigin="anonymous">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/browse.css') }}" crossorigin="anonymous" integrity="<integrity_hash>">
+<script type="module" src="{{ url_for('static', filename='js/search.js') }}" async defer crossorigin="anonymous" integrity="<integrity_hash>"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}" fetchpriority="low" crossorigin="anonymous" integrity="<integrity_hash>">
 {% endblock %}
 {% block selected_browse %} selected{% endblock %}
 {% block content %}
@@ -52,7 +52,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
+<script nonce="{{ csp_nonce() }}">
     // IIFE because this kills variables after finishing
     (function() {
         let init = function() {

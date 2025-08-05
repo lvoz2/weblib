@@ -22,7 +22,6 @@ def gbooks(
         + ("&download=" + filters["download"] if filters["download"] != "none" else "")
         + f"&filter={filters['available']}&printType={filters['print']}"
     )
-    print(url)
     headers = {"User-Agent": "WebLib/1.0 (https://github.com/lvoz2/weblib) (gzip)"}
     res: dict[
         str,
@@ -214,7 +213,7 @@ def wikipedia(
             timeout=5.0,
         )
         extract_res = requests.get(
-            "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&"
+            f"{api_url}action=query&prop=extracts&"
             + f"explaintext&exintro&format=json&pageids={page_ids_url}",
             headers=headers,
             timeout=5.0,
