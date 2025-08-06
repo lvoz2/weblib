@@ -3,7 +3,7 @@ from typing import Any, Optional, Sequence
 
 import sqlalchemy
 from sqlalchemy import orm
-from sqlalchemy.ext import mutable, associationproxy
+from sqlalchemy.ext import associationproxy, mutable
 
 engine = sqlalchemy.create_engine("sqlite:///server.db")
 
@@ -382,7 +382,7 @@ def create_item(
             item = items[0]
             is_saved = False
             if user_id is not None:
-                user: Optional[User] = session.get(User, user_id)
+                user = session.get(User, user_id)
                 if user is not None:
                     is_saved = user in item.saved_by
                     if add_to_recent_search:

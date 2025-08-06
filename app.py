@@ -7,13 +7,14 @@ from typing import Optional
 
 import dotenv
 import flask
-import flask_talisman
 import flask_session
 import flask_sqlalchemy
+import flask_talisman
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from src import db
 from src import search as search_funcs
 from src.sec_helpers import get_csrf_token, use_csrf, use_sri
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 dotenv.load_dotenv()
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
@@ -79,7 +80,7 @@ def index() -> str:
     logged_in: bool = user_id is not None
     return flask.render_template(
         "index.html",
-        csrf_token=get_csrf_token(flask.session),
+        csrf_token=get_csrf_token(),
         saved_items=saved_items,
         recent_items=db.get_recently_viewed(user_id),
         recent_search_items=db.get_recently_searched(user_id),
@@ -94,7 +95,7 @@ def browse() -> str:
     logged_in: bool = flask.session.get("user_id", None) is not None
     return flask.render_template(
         "browse.html",
-        csrf_token=get_csrf_token(flask.session),
+        csrf_token=get_csrf_token(),
         filters=filter_control,
         logged_in=logged_in,
     )
@@ -106,7 +107,7 @@ def query_page() -> str:
     """ask question page for site"""
     logged_in: bool = flask.session.get("user_id", None) is not None
     return flask.render_template(
-        "query.html", csrf_token=get_csrf_token(flask.session), logged_in=logged_in
+        "query.html", csrf_token=get_csrf_token(), logged_in=logged_in
     )
 
 
@@ -119,14 +120,14 @@ def saved() -> str:
     saved_items = None if user_id is None else db.get_saved_items(user_id)
     return flask.render_template(
         "saved.html",
-        csrf_token=get_csrf_token(flask.session),
+        csrf_token=get_csrf_token(),
         saved_items=saved_items,
         logged_in=logged_in,
     )
 
 
 @app.post("/api/browse/search")
-@use_csrf(flask.session, flask.request)
+@use_csrf
 def search() -> dict[str, bool | str | list[dict[str, str | bool | int]]]:
     user_id: Optional[int] = flask.session.get("user_id", None)
     data = flask.request.json
@@ -158,7 +159,7 @@ def redirect() -> str:
 
 
 @app.post("/api/users/login")
-@use_csrf(flask.session, flask.request)
+@use_csrf
 def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int]]]]:
     try:
         data: Optional[dict[str, str | dict[str, str]]] = flask.request.json
@@ -201,7 +202,7 @@ def send() -> dict[str, bool | str | Optional[list[dict[str, str | bool | int]]]
             "saved": saved_items,
             "recently_viewed": db.get_recently_viewed(user["id"]),
             "recently_searched": db.get_recently_searched(user["id"]),
-            "new_token": get_csrf_token(flask.session),
+            "new_token": get_csrf_token(),
         }
     except Exception as e:
         # Something bad happened
@@ -222,7 +223,7 @@ def logout() -> dict[str, bool | str]:
 
 
 @app.post("/api/item/save")
-@use_csrf(flask.session, flask.request)
+@use_csrf
 def save_item() -> dict[str, bool | str]:
     try:
         data = flask.request.json
@@ -244,7 +245,7 @@ def save_item() -> dict[str, bool | str]:
 
 
 @app.post("/api/item/unsave")
-@use_csrf(flask.session, flask.request)
+@use_csrf
 def unsave_item() -> dict[str, bool | str]:
     try:
         data = flask.request.json
@@ -265,7 +266,7 @@ def unsave_item() -> dict[str, bool | str]:
 
 
 @app.post("/api/recent/viewed")
-@use_csrf(flask.session, flask.request)
+@use_csrf
 def add_to_recent_viewed() -> dict[str, bool | str]:
     try:
         data: Optional[dict[str, str]] = flask.request.json

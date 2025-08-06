@@ -4,6 +4,7 @@ from typing import Optional
 from urllib import parse
 
 import requests
+
 from src import db
 
 
