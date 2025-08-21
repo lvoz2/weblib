@@ -44,7 +44,7 @@ flask_talisman.Talisman(
 )
 
 sri = python_sri.SRI(
-    "http://localhost:8010",
+    os.environ["DOMAIN"],
     static={"directory": "static", "url_path": "/static"},
     hash_alg="sha512",
 )
