@@ -10,11 +10,12 @@ import flask
 import flask_session
 import flask_sqlalchemy
 import flask_talisman
+import python_sri
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from src import db
 from src import search as search_funcs
-from src.sec_helpers import get_csrf_token, use_csrf, use_sri
+from src.sec_helpers import get_csrf_token, use_csrf
 
 dotenv.load_dotenv()
 app = flask.Flask(__name__, instance_path=str(pathlib.Path().absolute()))
@@ -42,11 +43,18 @@ flask_talisman.Talisman(
     session_cookie_samesite="Lax",
 )
 
+sri = python_sri.SRI(
+    "http://localhost:8010",
+    static={"directory": "static", "url_path": "/static"},
+    hash_alg="sha512",
+)
+
 
 # Extra headers
 def add_headers(res: flask.Response) -> flask.Response:
     res.headers["Cross-Origin-Resource-Policy"] = "same-origin"
     res.headers["Access-Control-Allow-Origin"] = os.environ["DOMAIN"]
+    res.headers["Cache-Control"] = "max-age=86400, private"
     return res
 
 
@@ -68,7 +76,7 @@ with open("src/filters.json", "r", encoding="utf-8") as f:
 
 @app.get("/")
 @app.get("/index.html")
-@use_sri(app)
+@sri.html_uses_sri("/")
 def index() -> str:
     """index.html for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
@@ -89,7 +97,7 @@ def index() -> str:
 
 
 @app.get("/browse")
-@use_sri(app)
+@sri.html_uses_sri("/browse")
 def browse() -> str:
     """browse page for site"""
     logged_in: bool = flask.session.get("user_id", None) is not None
@@ -102,7 +110,7 @@ def browse() -> str:
 
 
 @app.get("/query")
-@use_sri(app)
+@sri.html_uses_sri("/query")
 def query_page() -> str:
     """ask question page for site"""
     logged_in: bool = flask.session.get("user_id", None) is not None
@@ -112,7 +120,7 @@ def query_page() -> str:
 
 
 @app.get("/saved")
-@use_sri(app)
+@sri.html_uses_sri("/saved")
 def saved() -> str:
     """saved items page for site"""
     user_id: Optional[int] = flask.session.get("user_id", None)
